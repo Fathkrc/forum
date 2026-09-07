@@ -17,6 +17,6 @@ check-format:
 
 build:
 	mkdir -p bin
-	go build -o bin/movies-api ./cmd/forum
+	go build -o bin/forum ./cmd/forum
 
 check: check-format vet test build
