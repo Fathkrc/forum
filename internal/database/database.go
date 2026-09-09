@@ -48,7 +48,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS user (
 				CREATE TABLE post_like (
   			    user_id INTEGER NOT NULL,
     			post_id INTEGER NOT NULL,
-    			like INTEGER NOT NULL,
+    			vote INTEGER NOT NULL,
 
     			PRIMARY KEY (user_id, post_id),
 
@@ -61,7 +61,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS user (
 				CREATE TABLE comment_like (
   			    user_id INTEGER NOT NULL,
 				comment_id INTEFER NOT NULL
-    			like INTEGER NOT NULL,
+    			vote INTEGER NOT NULL,
 
     			PRIMARY KEY (user_id, post_id, comment_id),
 
