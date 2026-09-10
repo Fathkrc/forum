@@ -11,6 +11,7 @@ type Post struct {
 	Content        string
 	CreatedAt      time.Time
 	AuthorUsername string
+	CommentCount   int
 	Categories     []Category
 	Likes          int
 	Dislikes       int
