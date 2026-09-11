@@ -17,6 +17,7 @@ type createPostData struct {
 type postData struct {
 	Post     model.Post
 	Comments []model.Comment
+	Error    string
 }
 
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
