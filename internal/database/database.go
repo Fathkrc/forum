@@ -2,7 +2,7 @@ package database
 
 import "database/sql"
 
-const schema = `  CREATE TABLE IF NOT EXISTS user (
+const schema = `  CREATE TABLE IF NOT EXISTS users (
 				id 	INTEGER PRIMARY KEY AUTOINCREMENT,
 				username TEXT NOT NULL UNIQUE,
     			email TEXT NOT NULL UNIQUE,
@@ -11,7 +11,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS user (
 				);
 
 				CREATE TABLE IF NOT EXISTS sessions (
-				uuid INTEGER PRIMARY KEY AUTOINCREMENT,
+				uuid TEXT PRIMARY KEY,
 				user_id INTEGER NOT NULL,
 				expires_at DATETIME NOT NULL,
 
@@ -39,13 +39,13 @@ const schema = `  CREATE TABLE IF NOT EXISTS user (
     			FOREIGN KEY (user_id) REFERENCES users(id)
 				);
 
-				CREATE TABLE categories (
+				CREATE TABLE IF NOT EXISTS categories (
    				id INTEGER PRIMARY KEY AUTOINCREMENT,
     			name TEXT NOT NULL UNIQUE
 				);
 
 
-				CREATE TABLE post_like (
+				CREATE TABLE IF NOT EXISTS post_like (
   			    user_id INTEGER NOT NULL,
     			post_id INTEGER NOT NULL,
     			vote INTEGER NOT NULL,
@@ -58,9 +58,10 @@ const schema = `  CREATE TABLE IF NOT EXISTS user (
     			FOREIGN KEY (post_id) REFERENCES posts(id)
 				);
 
-				CREATE TABLE comment_like (
+				CREATE TABLE IF NOT EXISTS comment_like (
   			    user_id INTEGER NOT NULL,
-				comment_id INTEFER NOT NULL
+				comment_id INTEGER NOT NULL,
+				post_id INTEGER NOT NULL,
     			vote INTEGER NOT NULL,
 
     			PRIMARY KEY (user_id, post_id, comment_id),
@@ -68,6 +69,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS user (
     			CHECK (vote IN (-1, 1)),
 
     			FOREIGN KEY (user_id) REFERENCES users(id),
+				FOREIGN KEY (post_id) REFERENCES posts(id),
 				FOREIGN KEY (comment_id) REFERENCES comments(id)
 				);
 
