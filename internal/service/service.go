@@ -5,11 +5,11 @@ import "cmd/forum/internal/model"
 type Service interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
-	Logout(token string) error                //deletes a session by its token
+	Logout(token string) error //deletes a session by its token
 
 	CreatePost(userID int, title, content string, categoryIDs []int) error
 	GetPostByID(id int) (*model.Post, error)
-	GetAllPosts() ([]model.Post, error)                        // This powers the homepage.
+	GetAllPosts() ([]model.Post, error) // This powers the homepage.
 	GetPostsByCategory(categoryID int) ([]model.Post, error)
 	GetPostsByUser(userID int) ([]model.Post, error)
 	GetLikedPostsByUser(userID int) ([]model.Post, error)
@@ -19,7 +19,7 @@ type Service interface {
 
 	VotePost(userID, postID int, isLike bool) error
 	VoteComment(userID, commentID int, isLike bool) error
-	
+
 	GetAllCategories() ([]model.Category, error)
 	GetSessionByToken(token string) (*model.Session, error)
 
