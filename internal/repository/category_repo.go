@@ -134,7 +134,7 @@ func (r *CategoryRepo) GetCategoryByID(ctx context.Context, id int) (*model.Cate
     			FROM categories
     			WHERE id = ?
 			`
-	var category *model.Category
+	category := &model.Category{}
 
 	if err := r.db.QueryRowContext(ctx, query, id).Scan(&category.ID, &category.Name); err != nil {
 		return nil, err

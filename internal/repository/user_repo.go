@@ -35,12 +35,17 @@ func (r *UserRepo) InsertUser(ctx context.Context, user *model.User) error {
 
 func (r *UserRepo) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	query := `
-				SELECT id, username 
+				SELECT id, username, password, created_at 
 				FROM users
 				WHERE email = ?
 			`
 	user := &model.User{}
-	if err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Username); err != nil {
+	if err := r.db.QueryRowContext(ctx,
+		query,
+		email).Scan(&user.ID,
+		&user.Username,
+		&user.PasswordHash,
+		&user.CreatedAt); err != nil {
 		return nil, err
 	}
 	user.Email = email
