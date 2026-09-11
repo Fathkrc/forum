@@ -14,5 +14,9 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/like-comment", h.requireAuth(h.VoteComment))
 	mux.HandleFunc("/dislike-comment", h.requireAuth(h.VoteComment))
 	mux.HandleFunc("/comment", h.requireAuth(h.AddComment))
+	mux.HandleFunc("/profile", h.Profile)
+	mux.HandleFunc("/my-posts", h.requireAuth(h.MyPosts))
+	mux.HandleFunc("/liked-posts", h.requireAuth(h.LikedPosts))
+	mux.HandleFunc("/search", h.Search)
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 }
