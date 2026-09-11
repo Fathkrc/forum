@@ -13,6 +13,11 @@ type HomeData struct {
 }
 
 func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
 	categories, err := h.svc.GetAllCategories()
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
