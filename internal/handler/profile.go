@@ -29,7 +29,10 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 
 	idParam := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idParam)
-
+	if err != nil {
+		http.Error(w, "Invalid user id", http.StatusBadRequest)
+		return
+	}
 
 	user, err := h.svc.GetUserByID(id)
 	if err != nil {
