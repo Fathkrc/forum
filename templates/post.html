@@ -1,0 +1,29 @@
+{{define "content"}}
+    <article>
+        <h2>{{.Post.Title}}</h2>
+        <p>By {{.Post.AuthorUsername}} on {{.Post.CreatedAt.Format "Jan 02, 2006"}}</p>
+        <p>{{.Post.Content}}</p>
+        <p>
+            Categories:
+            {{range .Post.Categories}}{{.Name}} {{end}}
+        </p>
+        <p>
+            Likes: {{.Post.Likes}} | Dislikes: {{.Post.Dislikes}} | Comments: {{.Post.CommentCount}}
+        </p>
+    </article>
+
+    <section>
+        <h3>Comments</h3>
+        {{if .Comments}}
+            {{range .Comments}}
+                <article>
+                    <p>By {{.AuthorUsername}} on {{.CreatedAt.Format "Jan 02, 2006"}}</p>
+                    <p>{{.Content}}</p>
+                    <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}}</p>
+                </article>
+            {{end}}
+        {{else}}
+            <p>No comments yet.</p>
+        {{end}}
+    </section>
+{{end}}
