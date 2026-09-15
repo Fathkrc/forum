@@ -142,3 +142,31 @@ func (r *CategoryRepo) GetCategoryByID(ctx context.Context, id int) (*model.Cate
 
 	return category, nil
 }
+
+func (r *CategoryRepo) ListCategoriesByPost(ctx context.Context, postID int64) ([]*model.Category, error) {
+	query := `
+				SELECT c.id, c.name
+				FROM categories c
+				JOIN post_category pc ON c.id = pc.category_id
+				WHERE pc.post_id = ?
+			`
+	rows, err := r.db.QueryContext(ctx, query, postID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var categories []*model.Category
+	for rows.Next() {
+		category := &model.Category{}
+		if err := rows.Scan(&category.ID, &category.Name); err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return categories, nil
+}

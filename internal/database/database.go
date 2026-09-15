@@ -61,18 +61,25 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
 				CREATE TABLE IF NOT EXISTS comment_like (
   			    user_id INTEGER NOT NULL,
 				comment_id INTEGER NOT NULL,
-				post_id INTEGER NOT NULL,
     			vote INTEGER NOT NULL,
 
-    			PRIMARY KEY (user_id, post_id, comment_id),
+    			PRIMARY KEY (user_id, comment_id),
 
     			CHECK (vote IN (-1, 1)),
 
     			FOREIGN KEY (user_id) REFERENCES users(id),
-				FOREIGN KEY (post_id) REFERENCES posts(id),
 				FOREIGN KEY (comment_id) REFERENCES comments(id)
 				);
 
+				CREATE TABLE IF NOT EXISTS post_category (
+    			post_id INTEGER NOT NULL,
+    			category_id INTEGER NOT NULL,
+
+    			PRIMARY KEY (post_id, category_id),
+
+   				FOREIGN KEY (post_id) REFERENCES posts(id),
+    			FOREIGN KEY (category_id) REFERENCES categories(id)
+				);
 
 				`
 
