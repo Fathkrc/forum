@@ -1,0 +1,33 @@
+{{define "content"}}
+    <aside>
+        <h2>Categories</h2>
+        <ul>
+            <li><a href="/">All</a></li>
+            {{range .Categories}}
+                <li><a href="/?category={{.ID}}">{{.Name}}</a></li>
+            {{end}}
+        </ul>
+    </aside>
+
+    <section>
+        <h2>Posts</h2>
+        {{if .Posts}}
+            {{range .Posts}}
+                <article>
+                    <h3><a href="/post?id={{.ID}}">{{.Title}}</a></h3>
+                    <p>By {{.AuthorUsername}} on {{.CreatedAt.Format "Jan 02, 2006"}}</p>
+                    <p>{{.Content}}</p>
+                    <p>
+                        Categories:
+                        {{range .Categories}}{{.Name}} {{end}}
+                    </p>
+                    <p>
+                        Likes: {{.Likes}} | Dislikes: {{.Dislikes}} | Comments: {{.CommentCount}}
+                    </p>
+                </article>
+            {{end}}
+        {{else}}
+            <p>No posts found.</p>
+        {{end}}
+    </section>
+{{end}}

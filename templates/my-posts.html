@@ -1,0 +1,13 @@
+{{define "content"}}
+    <h2>My Posts</h2>
+    {{if .Posts}}
+        {{range .Posts}}
+            <article>
+                <h3><a href="/post?id={{.ID}}">{{.Title}}</a></h3>
+                <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}} | Comments: {{.CommentCount}}</p>
+            </article>
+        {{end}}
+    {{else}}
+        <p>You haven't created any posts yet.</p>
+    {{end}}
+{{end}}

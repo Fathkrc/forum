@@ -1,0 +1,24 @@
+{{define "content"}}
+    <h2>Search</h2>
+    <form action="/search" method="get">
+        <label>Search posts
+            <input type="text" name="q" value="{{.Query}}">
+        </label>
+        <button type="submit">Search</button>
+    </form>
+
+    {{if .Query}}
+        <h3>Results for "{{.Query}}"</h3>
+        {{if .Posts}}
+            {{range .Posts}}
+                <article>
+                    <h4><a href="/post?id={{.ID}}">{{.Title}}</a></h4>
+                    <p>By {{.AuthorUsername}}</p>
+                    <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}} | Comments: {{.CommentCount}}</p>
+                </article>
+            {{end}}
+        {{else}}
+            <p>No posts match your search.</p>
+        {{end}}
+    {{end}}
+{{end}}

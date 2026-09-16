@@ -1,0 +1,61 @@
+{{define "content"}}
+    <article>
+        <h2>{{.Post.Title}}</h2>
+        <p>By {{.Post.AuthorUsername}} on {{.Post.CreatedAt.Format "Jan 02, 2006"}}</p>
+        <p>{{.Post.Content}}</p>
+        <p>
+            Categories:
+            {{range .Post.Categories}}{{.Name}} {{end}}
+        </p>
+        <p>
+            Likes: {{.Post.Likes}} | Dislikes: {{.Post.Dislikes}} | Comments: {{.Post.CommentCount}}
+        </p>
+        <form action="/like-post" method="post">
+            <input type="hidden" name="post_id" value="{{.Post.ID}}">
+            <button type="submit">Like</button>
+        </form>
+        <form action="/dislike-post" method="post">
+            <input type="hidden" name="post_id" value="{{.Post.ID}}">
+            <button type="submit">Dislike</button>
+        </form>
+    </article>
+
+    <section>
+        <h3>Comments</h3>
+        {{if .Comments}}
+            {{range .Comments}}
+                <article>
+                    <p>By {{.AuthorUsername}} on {{.CreatedAt.Format "Jan 02, 2006"}}</p>
+                    <p>{{.Content}}</p>
+                    <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}}</p>
+                    <form action="/like-comment" method="post">
+                        <input type="hidden" name="comment_id" value="{{.ID}}">
+                        <input type="hidden" name="post_id" value="{{$.Post.ID}}">
+                        <button type="submit">Like</button>
+                    </form>
+                    <form action="/dislike-comment" method="post">
+                        <input type="hidden" name="comment_id" value="{{.ID}}">
+                        <input type="hidden" name="post_id" value="{{$.Post.ID}}">
+                        <button type="submit">Dislike</button>
+                    </form>
+                </article>
+            {{end}}
+        {{else}}
+            <p>No comments yet.</p>
+        {{end}}
+    </section>
+
+    <section>
+        <h3>Add a Comment</h3>
+        {{if .Error}}
+            <p class="error">{{.Error}}</p>
+        {{end}}
+        <form action="/comment" method="post">
+            <input type="hidden" name="post_id" value="{{.Post.ID}}">
+            <label>Comment
+                <textarea name="content" required></textarea>
+            </label>
+            <button type="submit">Comment</button>
+        </form>
+    </section>
+{{end}}
