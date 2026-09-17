@@ -2,15 +2,15 @@ package repository
 
 import "database/sql"
 
-type Repositoy struct {
+type Repository struct {
 	catRepo     *CategoryRepo
 	commentRepo *CommentRepo
 	userRepo    *UserRepo
 	postRepo    *PostRepo
 }
 
-func NewRepository(db *sql.DB) *Repositoy {
-	return &Repositoy{
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
 		catRepo:     NewCategoryRepo(db),
 		commentRepo: NewCommentRepo(db),
 		userRepo:    NewUserRepo(db),
