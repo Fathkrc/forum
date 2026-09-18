@@ -97,7 +97,11 @@ func NewDataBase(dbName string) (*sql.DB, error) {
 		db.Close()
 		return nil, err
 	}
-
+	err = InitializeQuery(db)
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
 	return db, nil
 }
 
