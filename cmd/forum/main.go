@@ -1,21 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"cmd/forum/internal/api"
+	"cmd/forum/internal/database"
+	"log"
 )
 
 func main() {
-	fmt.Println("HEEEEELLLLLOOOOOOOOO Itinitary Lions🦁🦁🦁")
+	db, err := database.NewDataBase("forum")
+	if err != nil {
+		log.Fatal("Error: ", err)
+	}
+	defer db.Close()
 
-	port := ":3000"
-	mux := http.NewServeMux()
-
-	// All Endpoints and Handler calls
-
-	fmt.Println("Starting the server...")
-	fmt.Printf("Server running at https://localhost%s\n", port)
-
-	http.ListenAndServe(port, nil)
-
+	if err := api.Run("8080", db); err != nil {
+		log.Fatal(err)
+	}
 }
