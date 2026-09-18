@@ -1,8 +1,27 @@
 package service
 
-import "cmd/forum/internal/model"
+import (
+	"cmd/forum/internal/model"
+	"cmd/forum/internal/repository"
+)
 
-type Service interface {
+type Service struct {
+	UserService     *AuthService
+	CategoryService *CategoryService
+	CommentService  *CommentService
+	PostService     *PostService
+}
+
+func NewService(repository *repository.Repository) *Service {
+	return &Service{
+		UserService:     NewAuthService(repository.UserRepo),
+		CategoryService: NewCategoryService(repository.CatRepo),
+		CommentService:  NewCommentService(repository.CommentRepo),
+		PostService:     NewPostService(repository.PostRepo),
+	}
+}
+
+type Service_ghost interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
 	Logout(token string) error //deletes a session by its token
@@ -26,4 +45,13 @@ type Service interface {
 	// Bonus feature (search page & profile page)
 	SearchPosts(query string) ([]model.Post, error)
 	GetUserByID(id int) (*model.User, error)
+}
+type ForumService struct {
+	repos *repository.Repository
+}
+
+func New(repos *repository.Repository) *ForumService {
+	return &ForumService{
+		repos: repos,
+	}
 }
