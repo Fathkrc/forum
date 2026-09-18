@@ -1,6 +1,9 @@
 package service
 
-import "cmd/forum/internal/model"
+import (
+	"cmd/forum/internal/model"
+	"cmd/forum/internal/repository"
+)
 
 type Service interface {
 	Register(email, username, password, confirmPassword string) error
@@ -26,4 +29,13 @@ type Service interface {
 	// Bonus feature (search page & profile page)
 	SearchPosts(query string) ([]model.Post, error)
 	GetUserByID(id int) (*model.User, error)
+}
+type ForumService struct {
+	repos *repository.Repository
+}
+
+func New(repos *repository.Repository) *ForumService {
+	return &ForumService{
+		repos: repos,
+	}
 }
