@@ -17,7 +17,7 @@ func New(repository *repository.Repository) *ForumService {
 		UserService:     NewAuthService(repository.UserRepo, repository.SessionRepo),
 		CategoryService: NewCategoryService(repository.CatRepo),
 		CommentService:  NewCommentService(repository.CommentRepo),
-		PostService:     NewPostService(repository.PostRepo),
+		PostService:     NewPostService(repository.PostRepo, repository.CatRepo),
 	}
 }
 
@@ -47,6 +47,22 @@ func (f *ForumService) GetAllCategories() ([]model.Category, error) {
 
 func (f *ForumService) CreatePost(userID int, title, content string, categoryIDs []int) error {
 	return f.PostService.CreatePost(userID, title, content, categoryIDs)
+}
+
+func (f *ForumService) GetPostByID(id int) (*model.Post, error) {
+	return f.PostService.GetPostByID(id)
+}
+
+func (f *ForumService) GetAllPosts() ([]model.Post, error) {
+	return f.PostService.GetAllPosts()
+}
+
+func (f *ForumService) GetPostsByCategory(categoryID int) ([]model.Post, error) {
+	return f.PostService.GetPostsByCategory(categoryID)
+}
+
+func (f *ForumService) GetPostsByUser(userID int) ([]model.Post, error) {
+	return f.PostService.GetPostsByUser(userID)
 }
 
 type Service interface {

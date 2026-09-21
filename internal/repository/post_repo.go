@@ -58,7 +58,7 @@ func (r *PostRepo) ListAllPosts(ctx context.Context) ([]*model.Post, error) {
 	query := `
 					SELECT id, user_id, title, body, created_at
 					FROM posts
-					ORDER BY created_at
+					ORDER BY created_at DESC
 				`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
