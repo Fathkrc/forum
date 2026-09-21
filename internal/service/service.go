@@ -45,6 +45,10 @@ func (f *ForumService) GetAllCategories() ([]model.Category, error) {
 	return f.CategoryService.GetAllCategories()
 }
 
+func (f *ForumService) CreatePost(userID int, title, content string, categoryIDs []int) error {
+	return f.PostService.CreatePost(userID, title, content, categoryIDs)
+}
+
 type Service interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
