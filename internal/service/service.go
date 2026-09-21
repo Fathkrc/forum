@@ -41,6 +41,10 @@ func (f *ForumService) GetUserByID(id int) (*model.User, error) {
 	return f.UserService.GetUserByID(id)
 }
 
+func (f *ForumService) GetAllCategories() ([]model.Category, error) {
+	return f.CategoryService.GetAllCategories()
+}
+
 type Service interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
