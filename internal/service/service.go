@@ -5,15 +5,15 @@ import (
 	"cmd/forum/internal/repository"
 )
 
-type Service struct {
+type ForumService struct {
 	UserService     *AuthService
 	CategoryService *CategoryService
 	CommentService  *CommentService
 	PostService     *PostService
 }
 
-func NewService(repository *repository.Repository) *Service {
-	return &Service{
+func New(repository *repository.Repository) *ForumService {
+	return &ForumService{
 		UserService:     NewAuthService(repository.UserRepo),
 		CategoryService: NewCategoryService(repository.CatRepo),
 		CommentService:  NewCommentService(repository.CommentRepo),
@@ -21,7 +21,7 @@ func NewService(repository *repository.Repository) *Service {
 	}
 }
 
-type Service_ghost interface {
+type Service interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
 	Logout(token string) error //deletes a session by its token
@@ -45,13 +45,4 @@ type Service_ghost interface {
 	// Bonus feature (search page & profile page)
 	SearchPosts(query string) ([]model.Post, error)
 	GetUserByID(id int) (*model.User, error)
-}
-type ForumService struct {
-	repos *repository.Repository
-}
-
-func New(repos *repository.Repository) *ForumService {
-	return &ForumService{
-		repos: repos,
-	}
 }

@@ -10,7 +10,7 @@ import (
 func Run(port string, db *sql.DB) error {
 	// TODO: wire repositories + service once implementations are ready.
 
-	// svc := service.NewService( /* dependencies */ )
+	// svc := service.New( /* dependencies */ )
 	// h := handler.New(svc)
 	mux := http.NewServeMux()
 	server := &http.Server{

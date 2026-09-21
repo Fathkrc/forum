@@ -13,10 +13,10 @@ type userContextKey string
 const UserKey userContextKey = "user"
 
 type Handler struct {
-	svc service.Service_ghost
+	svc service.Service
 }
 
-func New(svc service.Service_ghost) *Handler {
+func New(svc service.Service) *Handler {
 	return &Handler{svc: svc}
 }
 
