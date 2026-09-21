@@ -10,6 +10,7 @@ type ForumService struct {
 	CategoryService *CategoryService
 	CommentService  *CommentService
 	PostService     *PostService
+	VoteService     *VoteService
 }
 
 func New(repository *repository.Repository) *ForumService {
@@ -18,6 +19,7 @@ func New(repository *repository.Repository) *ForumService {
 		CategoryService: NewCategoryService(repository.CatRepo),
 		CommentService:  NewCommentService(repository.CommentRepo),
 		PostService:     NewPostService(repository.PostRepo, repository.CatRepo),
+		VoteService:     NewVoteService(repository.PostRepo, repository.CommentRepo),
 	}
 }
 
@@ -71,6 +73,14 @@ func (f *ForumService) CreateComment(postID, userID int, content string) error {
 
 func (f *ForumService) GetCommentsByPost(postID int) ([]model.Comment, error) {
 	return f.CommentService.GetCommentsByPost(postID)
+}
+
+func (f *ForumService) VotePost(userID, postID int, isLike bool) error {
+	return f.VoteService.VotePost(userID, postID, isLike)
+}
+
+func (f *ForumService) VoteComment(userID, commentID int, isLike bool) error {
+	return f.VoteService.VoteComment(userID, commentID, isLike)
 }
 
 type Service interface {
