@@ -164,7 +164,7 @@ func (r *PostRepo) SearchPosts(ctx context.Context, searchTerm string) ([]*model
 				FROM posts
 				WHERE title LIKE ? OR body LIKE ?
 			`
-	rows, err := r.db.QueryContext(ctx, query, searchTerm)
+	rows, err := r.db.QueryContext(ctx, query, "%"+searchTerm+"%", "%"+searchTerm+"%")
 	if err != nil {
 		return nil, err
 	}

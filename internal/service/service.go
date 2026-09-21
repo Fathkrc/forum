@@ -83,6 +83,14 @@ func (f *ForumService) VoteComment(userID, commentID int, isLike bool) error {
 	return f.VoteService.VoteComment(userID, commentID, isLike)
 }
 
+func (f *ForumService) GetLikedPostsByUser(userID int) ([]model.Post, error) {
+	return f.PostService.GetLikedPostsByUser(userID)
+}
+
+func (f *ForumService) SearchPosts(query string) ([]model.Post, error) {
+	return f.PostService.SearchPosts(query)
+}
+
 type Service interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)

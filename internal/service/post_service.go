@@ -80,8 +80,26 @@ func (s *PostService) GetPostsByUser(userID int) ([]model.Post, error) {
 	return toPostValues(posts), nil
 }
 
-func (s *PostService) GetPostByTerm(ctx context.Context, searchTerm string) ([]*model.Post, error) {
-	return s.postRepo.SearchPosts(ctx, searchTerm)
+func (s *PostService) GetLikedPostsByUser(userID int) ([]model.Post, error) {
+	posts, err := s.postRepo.ListLikedPostsByUser(context.Background(), int64(userID))
+	if err != nil {
+		return nil, err
+	}
+	if err := s.enrich(posts); err != nil {
+		return nil, err
+	}
+	return toPostValues(posts), nil
+}
+
+func (s *PostService) SearchPosts(query string) ([]model.Post, error) {
+	posts, err := s.postRepo.SearchPosts(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.enrich(posts); err != nil {
+		return nil, err
+	}
+	return toPostValues(posts), nil
 }
 
 func (s *PostService) enrich(posts []*model.Post) error {
