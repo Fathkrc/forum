@@ -46,12 +46,3 @@ type Service_ghost interface {
 	SearchPosts(query string) ([]model.Post, error)
 	GetUserByID(id int) (*model.User, error)
 }
-type ForumService struct {
-	repos *repository.Repository
-}
-
-func New(repos *repository.Repository) *ForumService {
-	return &ForumService{
-		repos: repos,
-	}
-}
