@@ -91,7 +91,7 @@ func (r *UserRepo) UsernameExists(ctx context.Context, username string) (bool, e
 
 	err := r.db.QueryRowContext(
 		ctx,
-		`SELECT 1 FROM users WHERE email = ?`,
+		`SELECT 1 FROM users WHERE username = ?`,
 		username,
 	).Scan(&exists)
 
