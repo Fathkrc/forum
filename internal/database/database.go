@@ -1,6 +1,10 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+
+	_ "github.com/mattn/go-sqlite3"
+)
 
 const schema = `  CREATE TABLE IF NOT EXISTS users (
 				id 	INTEGER PRIMARY KEY AUTOINCREMENT,
