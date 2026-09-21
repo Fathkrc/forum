@@ -65,6 +65,14 @@ func (f *ForumService) GetPostsByUser(userID int) ([]model.Post, error) {
 	return f.PostService.GetPostsByUser(userID)
 }
 
+func (f *ForumService) CreateComment(postID, userID int, content string) error {
+	return f.CommentService.CreateComment(postID, userID, content)
+}
+
+func (f *ForumService) GetCommentsByPost(postID int) ([]model.Comment, error) {
+	return f.CommentService.GetCommentsByPost(postID)
+}
+
 type Service interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
