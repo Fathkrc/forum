@@ -14,11 +14,27 @@ type ForumService struct {
 
 func New(repository *repository.Repository) *ForumService {
 	return &ForumService{
-		UserService:     NewAuthService(repository.UserRepo),
+		UserService:     NewAuthService(repository.UserRepo, repository.SessionRepo),
 		CategoryService: NewCategoryService(repository.CatRepo),
 		CommentService:  NewCommentService(repository.CommentRepo),
 		PostService:     NewPostService(repository.PostRepo),
 	}
+}
+
+func (f *ForumService) Register(email, username, password, confirmPassword string) error {
+	return f.UserService.Register(email, username, password, confirmPassword)
+}
+
+func (f *ForumService) Login(email, password string) (*model.Session, error) {
+	return f.UserService.Login(email, password)
+}
+
+func (f *ForumService) Logout(token string) error {
+	return f.UserService.Logout(token)
+}
+
+func (f *ForumService) GetSessionByToken(token string) (*model.Session, error) {
+	return f.UserService.GetSessionByToken(token)
 }
 
 type Service interface {
