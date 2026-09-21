@@ -5,7 +5,23 @@ import (
 	"cmd/forum/internal/repository"
 )
 
-type Service interface {
+type Service struct {
+	UserService     *AuthService
+	CategoryService *CategoryService
+	CommentService  *CommentService
+	PostService     *PostService
+}
+
+func NewService(repository *repository.Repository) *Service {
+	return &Service{
+		UserService:     NewAuthService(repository.UserRepo),
+		CategoryService: NewCategoryService(repository.CatRepo),
+		CommentService:  NewCommentService(repository.CommentRepo),
+		PostService:     NewPostService(repository.PostRepo),
+	}
+}
+
+type Service_ghost interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
 	Logout(token string) error //deletes a session by its token
