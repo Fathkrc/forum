@@ -105,6 +105,10 @@ func (s *AuthService) GetSessionByToken(token string) (*model.Session, error) {
 	return session, nil
 }
 
+func (s *AuthService) GetUserByID(id int) (*model.User, error) {
+	return s.userRepo.GetUserByID(context.Background(), int64(id))
+}
+
 func newSessionToken() (string, error) {
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {

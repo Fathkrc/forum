@@ -37,6 +37,10 @@ func (f *ForumService) GetSessionByToken(token string) (*model.Session, error) {
 	return f.UserService.GetSessionByToken(token)
 }
 
+func (f *ForumService) GetUserByID(id int) (*model.User, error) {
+	return f.UserService.GetUserByID(id)
+}
+
 type Service interface {
 	Register(email, username, password, confirmPassword string) error
 	Login(email, password string) (*model.Session, error)
