@@ -54,12 +54,12 @@ func (r *UserRepo) GetUserByEmail(ctx context.Context, email string) (*model.Use
 
 func (r *UserRepo) GetUserByID(ctx context.Context, id int64) (*model.User, error) {
 	query := `
-				SELECT email, username 
+				SELECT email, username
 				FROM users
 				WHERE id = ?
 			`
 	user := &model.User{}
-	if err := r.db.QueryRowContext(ctx, query, id).Scan(&user.ID, &user.Username); err != nil {
+	if err := r.db.QueryRowContext(ctx, query, id).Scan(&user.Email, &user.Username); err != nil {
 		return nil, err
 	}
 	user.ID = int(id)
@@ -91,7 +91,7 @@ func (r *UserRepo) UsernameExists(ctx context.Context, username string) (bool, e
 
 	err := r.db.QueryRowContext(
 		ctx,
-		`SELECT 1 FROM users WHERE email = ?`,
+		`SELECT 1 FROM users WHERE username = ?`,
 		username,
 	).Scan(&exists)
 
