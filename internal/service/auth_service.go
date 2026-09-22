@@ -1,21 +1,12 @@
 package service
 
-import (
-	"cmd/forum/internal/model"
-	"cmd/forum/internal/repository"
-	"context"
-)
+import "cmd/forum/internal/repository"
 
 type AuthService struct {
-	userRepo *repository.UserRepo
+	userRepo    *repository.UserRepo
+	sessionRepo *repository.SessionRepo
 }
 
-func NewAuthService(userRepo *repository.UserRepo) *AuthService {
-	return &AuthService{userRepo: userRepo}
-}
-
-func (s *AuthService) Register(ctx context.Context, email, username, password, confirmPassword string) error {
-
-	user := &model.User{}
-	return s.userRepo.InsertUser(ctx, user)
+func NewAuthService(userRepo *repository.UserRepo, sessionRepo *repository.SessionRepo) *AuthService {
+	return &AuthService{userRepo: userRepo, sessionRepo: sessionRepo}
 }
