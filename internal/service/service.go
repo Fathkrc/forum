@@ -2,7 +2,7 @@ package service
 
 import "cmd/forum/internal/repository"
 
-type ForumService struct {
+type Service struct {
 	UserService     *AuthService
 	CategoryService *CategoryService
 	CommentService  *CommentService
@@ -10,8 +10,8 @@ type ForumService struct {
 	VoteService     *VoteService
 }
 
-func New(repo *repository.Repository) *ForumService {
-	return &ForumService{
+func New(repo *repository.Repository) *Service {
+	return &Service{
 		UserService:     NewAuthService(repo.UserRepo, repo.SessionRepo),
 		CategoryService: NewCategoryService(repo.CatRepo),
 		CommentService:  NewCommentService(repo.CommentRepo),

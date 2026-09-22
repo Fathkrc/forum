@@ -1,6 +1,9 @@
 package api
 
 import (
+	"cmd/forum/internal/handler"
+	"cmd/forum/internal/repository"
+	"cmd/forum/internal/service"
 	"database/sql"
 	"log"
 	"net/http"
@@ -10,9 +13,11 @@ import (
 func Run(port string, db *sql.DB) error {
 	// TODO: wire repositories + service once implementations are ready.
 
-	// svc := service.NewService( /* dependencies */ )
-	// h := handler.New(svc)
+	repository := repository.NewRepository(db)
+	svc := service.New(repository)
+	h := handler.New(svc)
 	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
 	server := &http.Server{
 		Addr:              ":" + port,
 		Handler:           mux,
