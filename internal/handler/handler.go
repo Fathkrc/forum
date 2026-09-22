@@ -4,6 +4,7 @@ import (
 	"cmd/forum/internal/model"
 	"cmd/forum/internal/service"
 	"html/template"
+	"log"
 	"net/http"
 	"path/filepath"
 )
@@ -37,18 +38,22 @@ func getUserFromContext(r *http.Request) (*model.User, bool) {
 
 func renderTemplate(w http.ResponseWriter, name string, data any) {
 	files := []string{
-		filepath.Join("templates", name+".html"),
 		filepath.Join("templates", "layout.html"),
+		filepath.Join("templates", name+".html"),
 	}
 
 	tmpl, err := template.ParseFiles(files...)
 	if err != nil {
+		log.Printf("template parse error: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	err = tmpl.ExecuteTemplate(w, name, data)
-	if err != nil {
+	if err := tmpl.ExecuteTemplate(w, "layout.html", data); err != nil {
+		log.Printf("template execute error: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+}
+func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "home", nil)
 }
