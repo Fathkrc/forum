@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	argonMemory      = 64 * 1024   // 64 MB of RAM used while hashing
-	argonIterations  = 3           // does the work 3 times (slowness)
-	argonParallelism = 2           // 2 CPU threads
-	argonSaltLength  = 16          // 16 random bytes of salt
-	argonKeyLength   = 32          // output hash length: 32 bytes
+	argonMemory      = 64 * 1024 // 64 MB of RAM used while hashing
+	argonIterations  = 3         // does the work 3 times (slowness)
+	argonParallelism = 2         // 2 CPU threads
+	argonSaltLength  = 16        // 16 random bytes of salt
+	argonKeyLength   = 32        // output hash length: 32 bytes
 )
 
 // HashPassword hashes the given password using Argon2id and returns a
