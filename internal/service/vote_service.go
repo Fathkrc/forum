@@ -10,3 +10,11 @@ type VoteService struct {
 func NewVoteService(postRepo *repository.PostRepo, commentRepo *repository.CommentRepo) *VoteService {
 	return &VoteService{postRepo: postRepo, commentRepo: commentRepo}
 }
+
+func (s *VoteService) VotePost(userID, postID int, isLike bool) error {
+	return ErrNotImplemented
+}
+
+func (s *VoteService) VoteComment(userID, commentID int, isLike bool) error {
+	return ErrNotImplemented
+}
