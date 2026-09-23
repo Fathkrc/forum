@@ -30,8 +30,7 @@ func (r *VoteRepo) VoteComment(
 	userID int64,
 	commentID int64,
 	vote int,
-) error {
-}
+) error
 
 func (r *VoteRepo) GetPostVote(
 	ctx context.Context,
