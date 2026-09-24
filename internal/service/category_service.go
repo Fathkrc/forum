@@ -1,6 +1,9 @@
 package service
 
-import "cmd/forum/internal/repository"
+import (
+	"cmd/forum/internal/model"
+	"cmd/forum/internal/repository"
+)
 
 type CategoryService struct {
 	categoryRepo *repository.CategoryRepo
@@ -8,4 +11,8 @@ type CategoryService struct {
 
 func NewCategoryService(categoryRepo *repository.CategoryRepo) *CategoryService {
 	return &CategoryService{categoryRepo: categoryRepo}
+}
+
+func (s *CategoryService) GetAllCategories() ([]model.Category, error) {
+	return nil, ErrNotImplemented
 }
