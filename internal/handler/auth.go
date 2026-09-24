@@ -73,7 +73,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		Name:     sessionCookieName,
 		Value:    "",
 		Path:     "/",
-		MaxAge:   -1,      // expires it immediately
+		MaxAge:   -1, // expires it immediately
 		HttpOnly: true,
 	})
 
