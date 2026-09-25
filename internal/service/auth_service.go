@@ -3,8 +3,10 @@ package service
 import (
 	"cmd/forum/internal/model"
 	"cmd/forum/internal/repository"
+	"context"
 	"net/mail"
 	"strings"
+	"time"
 )
 
 type AuthService struct {
@@ -24,7 +26,37 @@ func (s *AuthService) Register(email, username, password, confirmPassword string
 		return err
 	}
 
-	return ErrNotImplemented
+	ctx := context.Background()
+
+	emailExists, err := s.userRepo.EmailExists(ctx, email)
+	if err != nil {
+		return err
+	}
+	if emailExists {
+		return ErrEmailExists
+	}
+
+	usernameExists, err := s.userRepo.UsernameExists(ctx, username)
+	if err != nil {
+		return err
+	}
+	if usernameExists {
+		return ErrUsernameExists
+	}
+
+	passwordHash, err := HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	user := &model.User{
+		Email:        email,
+		Username:     username,
+		PasswordHash: passwordHash,
+		CreatedAt:    time.Now().UTC(),
+	}
+
+	return s.userRepo.InsertUser(ctx, user)
 }
 
 func normalizeEmail(email string) string {
