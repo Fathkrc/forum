@@ -54,6 +54,3 @@ func renderTemplate(w http.ResponseWriter, name string, data any) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
-func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "home", nil)
-}
