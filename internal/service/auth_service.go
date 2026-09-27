@@ -135,13 +135,24 @@ func (s *AuthService) Login(email, password string) (*model.Session, error) {
 }
 
 func (s *AuthService) Logout(token string) error {
-	return ErrNotImplemented
+	return s.sessionRepo.DeleteSession(context.Background(), token)
 }
 
 func (s *AuthService) GetSessionByToken(token string) (*model.Session, error) {
-	return nil, ErrNotImplemented
+	ctx := context.Background()
+	session, err := s.sessionRepo.GetSessionByToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	if !time.Now().UTC().Before(session.ExpiresAt) {
+		_ = s.sessionRepo.DeleteSession(ctx, token)
+		return nil, ErrSessionExpired
+	}
+
+	return session, nil
 }
 
 func (s *AuthService) GetUserByID(id int) (*model.User, error) {
-	return nil, ErrNotImplemented
+	return s.userRepo.GetUserByID(context.Background(), int64(id))
 }
