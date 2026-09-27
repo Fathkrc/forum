@@ -7,12 +7,16 @@ import (
 	"net/mail"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type AuthService struct {
 	userRepo    *repository.UserRepo
 	sessionRepo *repository.SessionRepo
 }
+
+const sessionDuration = 24 * time.Hour
 
 func NewAuthService(userRepo *repository.UserRepo, sessionRepo *repository.SessionRepo) *AuthService {
 	return &AuthService{userRepo: userRepo, sessionRepo: sessionRepo}
@@ -90,6 +94,15 @@ func validateRegistration(email, username, password, confirmPassword string) err
 	}
 
 	return nil
+}
+
+func newSessionToken() (string, error) {
+	token, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+
+	return token.String(), nil
 }
 
 func (s *AuthService) Login(email, password string) (*model.Session, error) {
