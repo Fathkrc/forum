@@ -106,7 +106,32 @@ func newSessionToken() (string, error) {
 }
 
 func (s *AuthService) Login(email, password string) (*model.Session, error) {
-	return nil, ErrNotImplemented
+	ctx := context.Background()
+	user, err := s.userRepo.GetUserByEmail(ctx, normalizeEmail(email))
+	if err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	matches, err := VerifyPassword(password, user.PasswordHash)
+	if err != nil || !matches {
+		return nil, ErrInvalidCredentials
+	}
+
+	token, err := newSessionToken()
+	if err != nil {
+		return nil, err
+	}
+
+	session := &model.Session{
+		Token:     token,
+		UserID:    user.ID,
+		ExpiresAt: time.Now().UTC().Add(sessionDuration),
+	}
+	if err := s.sessionRepo.InsertSession(ctx, session); err != nil {
+		return nil, err
+	}
+
+	return session, nil
 }
 
 func (s *AuthService) Logout(token string) error {
