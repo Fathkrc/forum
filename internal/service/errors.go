@@ -2,4 +2,14 @@ package service
 
 import "errors"
 
-var ErrNotImplemented = errors.New("not implemented")
+var (
+	ErrEmailRequired                = errors.New("email is required")
+	ErrInvalidEmail                 = errors.New("please enter a valid email address")
+	ErrUsernameRequired             = errors.New("username is required")
+	ErrPasswordRequired             = errors.New("password is required")
+	ErrPasswordConfirmationRequired = errors.New("password confirmation is required")
+	ErrPasswordsDoNotMatch          = errors.New("passwords do not match")
+	ErrEmailExists                  = errors.New("an account with this email already exists")
+	ErrUsernameExists               = errors.New("that username is already taken")
+	ErrNotImplemented               = errors.New("not implemented")
+)
