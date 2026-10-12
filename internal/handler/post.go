@@ -16,7 +16,7 @@ type createPostData struct {
 
 type postData struct {
 	Post     model.Post
-	Comments []model.Comment
+	Comments []*model.Comment
 	Error    string
 }
 
@@ -100,7 +100,7 @@ func (h *Handler) ViewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := h.svc.GetCommentsByPost(id)
+	comments, err := h.svc.GetCommentsByPost(r.Context(), id)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

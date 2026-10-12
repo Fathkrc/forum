@@ -3,6 +3,7 @@ package service
 import (
 	"cmd/forum/internal/model"
 	"cmd/forum/internal/repository"
+	"context"
 )
 
 type Service struct {
@@ -47,12 +48,12 @@ func (s *Service) GetAllCategories() ([]model.Category, error) {
 	return s.CategoryService.GetAllCategories()
 }
 
-func (s *Service) CreateComment(postID, userID int, content string) error {
-	return s.CommentService.CreateComment(postID, userID, content)
+func (s *Service) CreateComment(ctx context.Context, postID, userID int, content string) error {
+	return s.CommentService.CreateComment(ctx, postID, userID, content)
 }
 
-func (s *Service) GetCommentsByPost(postID int) ([]model.Comment, error) {
-	return s.CommentService.GetCommentsByPost(postID)
+func (s *Service) GetCommentsByPost(ctx context.Context, postID int) ([]*model.Comment, error) {
+	return s.CommentService.GetCommentsByPost(ctx, postID)
 }
 
 func (s *Service) CreatePost(userID int, title, content string, categoryIDs []int) error {
