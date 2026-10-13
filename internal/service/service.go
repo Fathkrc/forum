@@ -3,6 +3,7 @@ package service
 import (
 	"cmd/forum/internal/model"
 	"cmd/forum/internal/repository"
+	"context"
 )
 
 type Service struct {
@@ -23,70 +24,70 @@ func New(repo *repository.Repository) *Service {
 	}
 }
 
-func (s *Service) Register(email, username, password, confirmPassword string) error {
+func (s *Service) Register(ctx context.Context, email, username, password, confirmPassword string) error {
 	return s.UserService.Register(email, username, password, confirmPassword)
 }
 
-func (s *Service) Login(email, password string) (*model.Session, error) {
+func (s *Service) Login(ctx context.Context, email, password string) (*model.Session, error) {
 	return s.UserService.Login(email, password)
 }
 
-func (s *Service) Logout(token string) error {
+func (s *Service) Logout(ctx context.Context, token string) error {
 	return s.UserService.Logout(token)
 }
 
-func (s *Service) GetSessionByToken(token string) (*model.Session, error) {
+func (s *Service) GetSessionByToken(ctx context.Context, token string) (*model.Session, error) {
 	return s.UserService.GetSessionByToken(token)
 }
 
-func (s *Service) GetUserByID(id int) (*model.User, error) {
+func (s *Service) GetUserByID(ctx context.Context, id int) (*model.User, error) {
 	return s.UserService.GetUserByID(id)
 }
 
-func (s *Service) GetAllCategories() ([]model.Category, error) {
-	return s.CategoryService.GetAllCategories()
+func (s *Service) GetAllCategories(ctx context.Context) ([]model.Category, error) {
+	return s.CategoryService.GetAllCategories(ctx)
 }
 
-func (s *Service) CreateComment(postID, userID int, content string) error {
+func (s *Service) CreateComment(ctx context.Context, postID, userID int, content string) error {
 	return s.CommentService.CreateComment(postID, userID, content)
 }
 
-func (s *Service) GetCommentsByPost(postID int) ([]model.Comment, error) {
+func (s *Service) GetCommentsByPost(ctx context.Context, postID int) ([]model.Comment, error) {
 	return s.CommentService.GetCommentsByPost(postID)
 }
 
-func (s *Service) CreatePost(userID int, title, content string, categoryIDs []int) error {
+func (s *Service) CreatePost(ctx context.Context, userID int, title, content string, categoryIDs []int) error {
 	return s.PostService.CreatePost(userID, title, content, categoryIDs)
 }
 
-func (s *Service) GetPostByID(id int) (*model.Post, error) {
+func (s *Service) GetPostByID(ctx context.Context, id int) (*model.Post, error) {
 	return s.PostService.GetPostByID(id)
 }
 
-func (s *Service) GetAllPosts() ([]model.Post, error) {
+func (s *Service) GetAllPosts(ctx context.Context) ([]model.Post, error) {
 	return s.PostService.GetAllPosts()
 }
 
-func (s *Service) GetPostsByCategory(categoryID int) ([]model.Post, error) {
+func (s *Service) GetPostsByCategory(ctx context.Context, categoryID int) ([]model.Post, error) {
 	return s.PostService.GetPostsByCategory(categoryID)
 }
 
-func (s *Service) GetPostsByUser(userID int) ([]model.Post, error) {
+func (s *Service) GetPostsByUser(ctx context.Context, userID int) ([]model.Post, error) {
 	return s.PostService.GetPostsByUser(userID)
 }
 
-func (s *Service) GetLikedPostsByUser(userID int) ([]model.Post, error) {
+func (s *Service) GetLikedPostsByUser(ctx context.Context, userID int) ([]model.Post, error) {
 	return s.PostService.GetLikedPostsByUser(userID)
 }
 
-func (s *Service) SearchPosts(query string) ([]model.Post, error) {
+func (s *Service) SearchPosts(ctx context.Context, query string) ([]model.Post, error) {
 	return s.PostService.SearchPosts(query)
 }
 
-func (s *Service) VotePost(userID, postID int, isLike bool) error {
+func (s *Service) VotePost(ctx context.Context, userID, postID int, isLike bool) error {
 	return s.VoteService.VotePost(userID, postID, isLike)
 }
 
-func (s *Service) VoteComment(userID, commentID int, isLike bool) error {
+func (s *Service) VoteComment(ctx context.Context, userID, commentID int, isLike bool) error {
 	return s.VoteService.VoteComment(userID, commentID, isLike)
 }

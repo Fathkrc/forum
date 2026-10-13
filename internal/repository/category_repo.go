@@ -71,9 +71,9 @@ func (r *CategoryRepo) InsertMultiCategory(ctx context.Context, categories []*mo
 	return tx.Commit()
 }
 
-func (r *CategoryRepo) ListMultiCategory(ctx context.Context) ([]*model.Category, error) {
+func (r *CategoryRepo) ListMultiCategory(ctx context.Context) ([]model.Category, error) {
 
-	query := ` 
+	query := `
 				SELECT id, name
     			FROM categories
     			ORDER BY name
@@ -84,10 +84,10 @@ func (r *CategoryRepo) ListMultiCategory(ctx context.Context) ([]*model.Category
 		return nil, err
 	}
 	defer rows.Close()
-	var categories []*model.Category
+	var categories []model.Category
 	for rows.Next() {
-		category := &model.Category{}
-		if err := rows.Scan(&category.ID, &category.Name); err != nil {
+		category := model.Category{}
+		if err := rows.Scan(category.ID, category.Name); err != nil {
 			return nil, err
 		}
 		categories = append(categories, category)
@@ -129,7 +129,7 @@ func (r *CategoryRepo) DeleteCategory(ctx context.Context, id int) error {
 }
 
 func (r *CategoryRepo) GetCategoryByID(ctx context.Context, id int) (*model.Category, error) {
-	query := ` 
+	query := `
 				SELECT id, name
     			FROM categories
     			WHERE id = ?
