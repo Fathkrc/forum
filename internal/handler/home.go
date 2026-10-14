@@ -43,7 +43,7 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 		}
 		selectedID = categoryID
 	} else {
-		posts, err = h.svc.GetAllPosts()
+		posts, err = h.svc.GetAllPosts(r.Context())
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return

@@ -3,6 +3,7 @@ package service
 import (
 	"cmd/forum/internal/model"
 	"cmd/forum/internal/repository"
+	"context"
 )
 
 type Service struct {
@@ -55,20 +56,20 @@ func (s *Service) GetCommentsByPost(postID int) ([]model.Comment, error) {
 	return s.CommentService.GetCommentsByPost(postID)
 }
 
-func (s *Service) CreatePost(userID int, title, content string, categoryIDs []int) error {
-	return s.PostService.CreatePost(userID, title, content, categoryIDs)
+func (s *Service) CreatePost(ctx context.Context, userID int, title, content string, categoryIDs []int) error {
+	return s.PostService.CreatePost(ctx, userID, title, content, categoryIDs)
 }
 
-func (s *Service) GetPostByID(id int) (*model.Post, error) {
-	return s.PostService.GetPostByID(id)
+func (s *Service) GetPostByID(ctx context.Context, id int) (*model.Post, error) {
+	return s.PostService.GetPostByID(ctx, id)
 }
 
-func (s *Service) GetAllPosts() ([]model.Post, error) {
-	return s.PostService.GetAllPosts()
+func (s *Service) GetAllPosts(ctx context.Context) ([]model.Post, error) {
+	return s.PostService.GetAllPosts(ctx)
 }
 
-func (s *Service) GetPostsByCategory(categoryID int) ([]model.Post, error) {
-	return s.PostService.GetPostsByCategory(categoryID)
+func (s *Service) GetPostsByCategory(ctx context.Context, categoryID int) ([]model.Post, error) {
+	return s.PostService.GetPostsByCategory(ctx, categoryID)
 }
 
 func (s *Service) GetPostsByUser(userID int) ([]model.Post, error) {

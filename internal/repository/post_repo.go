@@ -34,10 +34,49 @@ func (r *PostRepo) InsertPost(ctx context.Context, post *model.Post) error {
 
 	return nil
 }
+func (r *PostRepo) InsertPostWithCategories(ctx context.Context, post *model.Post, categoryIDs []int) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
+	result, err := tx.ExecContext(ctx,
+		`INSERT INTO posts (user_id, title, body) VALUES (?, ?, ?)`,
+		post.UserID,
+		post.Title,
+		post.Content,
+	)
+	if err != nil {
+		return err
+	}
+
+	postID, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	for _, categoryID := range categoryIDs {
+		_, err := tx.ExecContext(ctx,
+			`INSERT INTO post_category (post_id, category_id) VALUES (?, ?)`,
+			postID,
+			categoryID,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	post.ID = int(postID)
+	return nil
+}
 func (r *PostRepo) GetPostByID(ctx context.Context, postID int64) (*model.Post, error) {
 	query := `
-				SELECT id, user_id, title, body, created_at 
+				SELECT id, user_id, title, body, created_at
 				FROM posts
 				WHERE id = ?
 			`
@@ -118,10 +157,10 @@ func (r *PostRepo) ListPostsByUser(ctx context.Context, userID int64) ([]*model.
 func (r *PostRepo) ListPostsByCategoryID(ctx context.Context, categoryID int64) ([]*model.Post, error) {
 
 	query := `
-					SELECT p.id, p.user_id, p.title, p.body, p.created_at 
-					FROM posts p JOIN post_category pc 
+					SELECT p.id, p.user_id, p.title, p.body, p.created_at
+					FROM posts p JOIN post_category pc
 					ON p.id = pc.post_id
-					WHERE pc.category_id = ? 
+					WHERE pc.category_id = ?
 				`
 	rows, err := r.db.QueryContext(ctx, query, categoryID)
 	if err != nil {
