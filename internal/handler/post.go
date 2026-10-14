@@ -140,6 +140,36 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
 	}
 }
+func (h *Handler) ListPostsByUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
+	if err != nil || userID <= 0 {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.GetPostsByUser(r.Context(), userID)
+	if err != nil {
+		log.Printf("GetPostsByUser error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No posts found for this user.")
+		return
+	}
+
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
 func (h *Handler) ListPostsByCategory(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -191,6 +221,36 @@ func (h *Handler) SearchPosts(w http.ResponseWriter, r *http.Request) {
 
 	if len(posts) == 0 {
 		fmt.Fprintln(w, "No matching posts found.")
+		return
+	}
+
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) ListLikedPosts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
+	if err != nil || userID <= 0 {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.GetLikedPostsByUser(r.Context(), userID)
+	if err != nil {
+		log.Printf("GetLikedPosts error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No liked posts found.")
 		return
 	}
 

@@ -11,10 +11,12 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 
 	mux.HandleFunc("/create-post", h.requireAuth(h.CreatePost)) //this is real route
 	// mux.HandleFunc("/create-post", h.CreatePost) // this is for test todo: remove
+	mux.HandleFunc("/posts/user", h.ListPostsByUser)
 	mux.HandleFunc("/posts/search", h.SearchPosts)
 	mux.HandleFunc("/post", h.GetPostById)
 	mux.HandleFunc("/like-post", h.requireAuth(h.VotePost))
 	mux.HandleFunc("/dislike-post", h.requireAuth(h.VotePost))
+	mux.HandleFunc("/posts/liked", h.ListLikedPosts)
 	mux.HandleFunc("/posts/list", h.ListPosts)
 	mux.HandleFunc("/posts/test-view", h.TestGetPost)
 	mux.HandleFunc("/posts/category", h.ListPostsByCategory)
