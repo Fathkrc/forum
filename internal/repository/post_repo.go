@@ -153,7 +153,44 @@ func (r *PostRepo) ListPostsByUser(ctx context.Context, userID int64) ([]*model.
 	}
 	return posts, nil
 }
+func (r *PostRepo) ListLikedPostsByUser(ctx context.Context, userID int64) ([]*model.Post, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT p.id, p.user_id, p.title, p.body, p.created_at
+		FROM posts p
+		JOIN post_like pl ON pl.post_id = p.id
+		WHERE pl.user_id = ? AND pl.vote = 1
+		ORDER BY p.created_at DESC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
+	var posts []*model.Post
+
+	for rows.Next() {
+		post := &model.Post{}
+
+		err := rows.Scan(
+			&post.ID,
+			&post.UserID,
+			&post.Title,
+			&post.Content,
+			&post.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
 func (r *PostRepo) ListPostsByCategoryID(ctx context.Context, categoryID int64) ([]*model.Post, error) {
 
 	query := `
@@ -198,12 +235,14 @@ func (r *PostRepo) AddCategoryToPost(ctx context.Context, postID int64, category
 }
 
 func (r *PostRepo) SearchPosts(ctx context.Context, searchTerm string) ([]*model.Post, error) {
-	query := `
-				SELECT id, user_id, title, body, created_at
-				FROM posts
-				WHERE title LIKE ? OR body LIKE ?
-			`
-	rows, err := r.db.QueryContext(ctx, query, searchTerm)
+	pattern := "%" + searchTerm + "%"
+
+	rows, err := r.db.QueryContext(ctx, `
+			SELECT id, user_id, title, body, created_at
+			FROM posts
+			WHERE title LIKE ? OR body LIKE ?
+			ORDER BY created_at DESC
+		`, pattern, pattern)
 	if err != nil {
 		return nil, err
 	}

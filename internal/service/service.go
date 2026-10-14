@@ -72,16 +72,16 @@ func (s *Service) GetPostsByCategory(ctx context.Context, categoryID int) ([]mod
 	return s.PostService.GetPostsByCategory(ctx, categoryID)
 }
 
-func (s *Service) GetPostsByUser(userID int) ([]model.Post, error) {
-	return s.PostService.GetPostsByUser(userID)
+func (s *Service) GetPostsByUser(ctx context.Context, userID int) ([]model.Post, error) {
+	return s.PostService.GetPostsByUser(ctx, userID)
 }
 
-func (s *Service) GetLikedPostsByUser(userID int) ([]model.Post, error) {
-	return s.PostService.GetLikedPostsByUser(userID)
+func (s *Service) GetLikedPostsByUser(ctx context.Context, userID int) ([]model.Post, error) {
+	return s.PostService.GetLikedPostsByUser(ctx, userID)
 }
 
-func (s *Service) SearchPosts(query string) ([]model.Post, error) {
-	return s.PostService.SearchPosts(query)
+func (s *Service) SearchPosts(ctx context.Context, query string) ([]model.Post, error) {
+	return s.PostService.SearchPosts(ctx, query)
 }
 
 func (s *Service) VotePost(userID, postID int, isLike bool) error {

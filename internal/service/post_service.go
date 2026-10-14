@@ -91,14 +91,62 @@ func (s *PostService) GetPostsByCategory(ctx context.Context, categoryID int) ([
 	return posts, nil
 }
 
-func (s *PostService) GetPostsByUser(userID int) ([]model.Post, error) {
-	return nil, ErrNotImplemented
+func (s *PostService) GetPostsByUser(ctx context.Context, userID int) ([]model.Post, error) {
+	if userID <= 0 {
+		return nil, errors.New("invalid user ID")
+	}
+
+	repoPosts, err := s.postRepo.ListPostsByUser(ctx, int64(userID))
+	if err != nil {
+		return nil, err
+	}
+
+	posts := make([]model.Post, 0, len(repoPosts))
+	for _, post := range repoPosts {
+		posts = append(posts, *post)
+	}
+
+	return posts, nil
 }
 
-func (s *PostService) GetLikedPostsByUser(userID int) ([]model.Post, error) {
-	return nil, ErrNotImplemented
+func (s *PostService) GetLikedPostsByUser(ctx context.Context,
+	userID int,
+) ([]model.Post, error) {
+	if userID <= 0 {
+		return nil, errors.New("invalid user ID")
+	}
+
+	repoPosts, err := s.postRepo.ListLikedPostsByUser(ctx, int64(userID))
+	if err != nil {
+		return nil, err
+	}
+
+	posts := make([]model.Post, 0, len(repoPosts))
+
+	for _, post := range repoPosts {
+		posts = append(posts, *post)
+	}
+
+	return posts, nil
 }
 
-func (s *PostService) SearchPosts(query string) ([]model.Post, error) {
-	return nil, ErrNotImplemented
+func (s *PostService) SearchPosts(ctx context.Context, query string) ([]model.Post, error) {
+	query = strings.TrimSpace(query)
+
+	if query == "" {
+		return []model.Post{}, nil
+	}
+
+	repoPosts, err := s.postRepo.SearchPosts(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	posts := make([]model.Post, 0, len(repoPosts))
+
+	for _, post := range repoPosts {
+		posts = append(posts, *post)
+	}
+
+	return posts, nil
 }

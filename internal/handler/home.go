@@ -36,7 +36,7 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		posts, err = h.svc.GetPostsByCategory(categoryID)
+		posts, err = h.svc.GetPostsByCategory(r.Context(), categoryID)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
