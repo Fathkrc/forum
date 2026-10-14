@@ -30,7 +30,7 @@ func (h *Handler) AddComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.svc.CreateComment(postID, user.ID, content)
+	err = h.svc.CreateComment(r.Context(), postID, user.ID, content)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -46,7 +46,7 @@ func (h *Handler) renderPostWithError(w http.ResponseWriter, r *http.Request, po
 		return
 	}
 
-	comments, err := h.svc.GetCommentsByPost(postID)
+	comments, err := h.svc.GetCommentsByPost(r.Context(), postID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
