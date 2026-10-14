@@ -25,7 +25,7 @@ func (h *Handler) VotePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.svc.VotePost(user.ID, postID, isLike)
+	err = h.svc.VotePost(r.Context(), user.ID, postID, isLike)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

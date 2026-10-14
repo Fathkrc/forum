@@ -20,7 +20,7 @@ func New(repo *repository.Repository) *Service {
 		CategoryService: NewCategoryService(repo.CatRepo),
 		CommentService:  NewCommentService(repo.CommentRepo),
 		PostService:     NewPostService(repo.PostRepo),
-		VoteService:     NewVoteService(repo.PostRepo, repo.CommentRepo),
+		VoteService:     NewVoteService(repo.PostRepo, repo.VoteRepo, repo.CommentRepo),
 	}
 }
 
@@ -84,8 +84,8 @@ func (s *Service) SearchPosts(ctx context.Context, query string) ([]model.Post, 
 	return s.PostService.SearchPosts(ctx, query)
 }
 
-func (s *Service) VotePost(userID, postID int, isLike bool) error {
-	return s.VoteService.VotePost(userID, postID, isLike)
+func (s *Service) VotePost(ctx context.Context, userID, postID int, isLike bool) error {
+	return s.VoteService.VotePost(ctx, userID, postID, isLike)
 }
 
 func (s *Service) VoteComment(userID, commentID int, isLike bool) error {

@@ -513,3 +513,174 @@ func TestListLikedPostsHandler(t *testing.T) {
 		})
 	}
 }
+func TestGetPostByIDHandler(t *testing.T) {
+	db, svc, mux := setupPostTest(t)
+	ctx := context.Background()
+
+	// 1. Create a test user.
+	result, err := db.ExecContext(ctx,
+		`INSERT INTO users (username, email, password)
+		 VALUES (?, ?, ?)`,
+		"alice", "alice@example.com", "test-hash",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	userID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 2. Create a post through our real service.
+	err = svc.CreatePost(
+		ctx,
+		int(userID),
+		"The Lost Kingdom",
+		"A fantasy adventure story",
+		nil,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 3. Retrieve the actual post ID.
+	var postID int
+
+	err = db.QueryRowContext(ctx,
+		`SELECT id FROM posts WHERE title = ?`,
+		"The Lost Kingdom",
+	).Scan(&postID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 4. Define our HTTP test cases.
+	tests := []struct {
+		name         string
+		url          string
+		wantStatus   int
+		wantContains string
+	}{
+		{
+			name:         "existing post",
+			url:          fmt.Sprintf("/posts/test-view?id=%d", postID),
+			wantStatus:   http.StatusOK,
+			wantContains: "The Lost Kingdom",
+		},
+		{
+			name:       "invalid post ID",
+			url:        "/posts/test-view?id=abc",
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "missing post ID",
+			url:        "/posts/test-view",
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "nonexistent post",
+			url:        "/posts/test-view?id=999999",
+			wantStatus: http.StatusNotFound,
+		},
+	}
+
+	// 5. Run each test through the real router.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(
+				http.MethodGet,
+				tt.url,
+				nil,
+			)
+
+			rec := httptest.NewRecorder()
+
+			mux.ServeHTTP(rec, req)
+
+			if rec.Code != tt.wantStatus {
+				t.Fatalf(
+					"expected status %d, got %d. Body: %s",
+					tt.wantStatus,
+					rec.Code,
+					rec.Body.String(),
+				)
+			}
+
+			if tt.wantContains != "" &&
+				!strings.Contains(rec.Body.String(), tt.wantContains) {
+				t.Errorf(
+					"expected response to contain %q, got %q",
+					tt.wantContains,
+					rec.Body.String(),
+				)
+			}
+		})
+	}
+}
+func TestListPostsHandler(t *testing.T) {
+	db, svc, mux := setupPostTest(t)
+	ctx := context.Background()
+
+	// Create a test user.
+	result, err := db.ExecContext(ctx,
+		`INSERT INTO users (username, email, password)
+		 VALUES (?, ?, ?)`,
+		"alice", "alice@example.com", "test-hash",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	userID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// First check the empty database.
+	t.Run("empty posts", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/posts/list", nil)
+		rec := httptest.NewRecorder()
+
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("expected 200, got %d", rec.Code)
+		}
+
+		if strings.Contains(rec.Body.String(), "Dragon Post") {
+			t.Fatal("unexpected post in empty database")
+		}
+	})
+
+	// Create two posts.
+	for _, title := range []string{"Dragon Post", "Space Post"} {
+		if err := svc.CreatePost(
+			ctx, int(userID), title, "Test content", nil,
+		); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	t.Run("list all posts", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/posts/list", nil)
+		rec := httptest.NewRecorder()
+
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("expected 200, got %d: %s",
+				rec.Code, rec.Body.String())
+		}
+
+		body := rec.Body.String()
+
+		if !strings.Contains(body, "Dragon Post") {
+			t.Error("Dragon Post missing")
+		}
+
+		if !strings.Contains(body, "Space Post") {
+			t.Error("Space Post missing")
+		}
+	})
+}
