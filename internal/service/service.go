@@ -54,26 +54,18 @@ func (s *Service) CreateCategory(
 	return s.CategoryService.CreateCategory(ctx, category)
 }
 
-func (s *Service) GetCategoryByID(
-	ctx context.Context,
-	id int,
-) (*model.Category, error) {
+func (s *Service) GetCategoryByID(ctx context.Context, id int) (*model.Category, error) {
 	return s.CategoryService.GetCategoryByID(ctx, id)
 }
 
-func (s *Service) UpdateCategory(
-	ctx context.Context,
-	category model.Category,
-) error {
+func (s *Service) UpdateCategory(ctx context.Context, category model.Category) error {
 	return s.CategoryService.UpdateCategory(ctx, category)
 }
 
-func (s *Service) DeleteCategory(
-	ctx context.Context,
-	id int,
-) error {
+func (s *Service) DeleteCategory(ctx context.Context, id int) error {
 	return s.CategoryService.DeleteCategory(ctx, id)
 }
+
 func (s *Service) CreateComment(ctx context.Context, postID, userID int, content string) error {
 	return s.CommentService.CreateComment(postID, userID, content)
 }

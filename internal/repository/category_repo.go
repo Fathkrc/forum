@@ -170,10 +170,7 @@ func (r *CategoryRepo) ListCategoriesByPost(ctx context.Context, postID int64) (
 	}
 	return categories, nil
 }
-func (r *CategoryRepo) UpdateCategory(
-	ctx context.Context,
-	category *model.Category,
-) error {
+func (r *CategoryRepo) UpdateCategory(ctx context.Context, category *model.Category) error {
 	result, err := r.db.ExecContext(ctx,
 		`UPDATE categories SET name = ? WHERE id = ?`,
 		category.Name,

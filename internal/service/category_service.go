@@ -56,10 +56,7 @@ func (s *CategoryService) UpdateCategory(
 	return s.categoryRepo.UpdateCategory(ctx, &category)
 }
 
-func (s *CategoryService) DeleteCategory(
-	ctx context.Context,
-	id int,
-) error {
+func (s *CategoryService) DeleteCategory(ctx context.Context, id int) error {
 	if id <= 0 {
 		return errors.New("invalid category ID")
 	}
