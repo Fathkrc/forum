@@ -2,7 +2,6 @@ package handler
 
 import (
 	"cmd/forum/internal/model"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -22,16 +21,13 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 	categories, err := h.svc.GetAllCategories(r.Context())
 	// this part is  temporary !!!!
 	// this part is temporary !!!!
-	fmt.Println(categories)
+	// fmt.Println(categories)
 	if err != nil {
 		log.Printf("category error: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	for _, category := range categories {
-		fmt.Fprintf(w, "ID: %d, Name: %s\n", category.ID, category.Name)
-	}
 	//return // temporary: don't continue into posts
 	//  ^
 	// / \
