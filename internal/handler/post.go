@@ -135,12 +135,74 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "No posts found.")
 		return
 	}
+	// todo : delete later
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) ListPostsByCategory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categoryID, err := strconv.Atoi(r.URL.Query().Get("category"))
+	if err != nil || categoryID <= 0 {
+		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.GetPostsByCategory(r.Context(), categoryID)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No posts found in this category.")
+		return
+	}
+
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) SearchPosts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+
+	if query == "" {
+		http.Error(w, "Search query is required", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.SearchPosts(r.Context(), query)
+	if err != nil {
+		log.Printf("SearchPosts error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No matching posts found.")
+		return
+	}
 
 	for _, post := range posts {
 		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
 	}
 }
 func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id <= 0 {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)

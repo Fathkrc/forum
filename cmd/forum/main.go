@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	db, err := database.NewDataBase("forum")
+	db, err := database.NewDataBase("./data/forum.db")
 	if err != nil {
 		log.Fatal("Error: ", err)
 	}
