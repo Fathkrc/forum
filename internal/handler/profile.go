@@ -34,13 +34,13 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.svc.GetUserByID(id)
+	user, err := h.svc.GetUserByID(r.Context(), id)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	posts, err := h.svc.GetPostsByUser(id)
+	posts, err := h.svc.GetPostsByUser(r.Context(), id)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -61,7 +61,7 @@ func (h *Handler) MyPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := h.svc.GetPostsByUser(user.ID)
+	posts, err := h.svc.GetPostsByUser(r.Context(), user.ID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -82,7 +82,7 @@ func (h *Handler) LikedPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := h.svc.GetLikedPostsByUser(user.ID)
+	posts, err := h.svc.GetLikedPostsByUser(r.Context(), user.ID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -103,7 +103,7 @@ func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := h.svc.SearchPosts(query)
+	posts, err := h.svc.SearchPosts(r.Context(), query)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

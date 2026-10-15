@@ -40,7 +40,7 @@ func (h *Handler) AddComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) renderPostWithError(w http.ResponseWriter, r *http.Request, postID int, msg string) {
-	post, err := h.svc.GetPostByID(postID)
+	post, err := h.svc.GetPostByID(r.Context(), postID)
 	if err != nil {
 		http.NotFound(w, r)
 		return

@@ -23,7 +23,7 @@ type postData struct {
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		categories, err := h.svc.GetAllCategories()
+		categories, err := h.svc.GetAllCategories(r.Context())
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -57,7 +57,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if strings.TrimSpace(title) == "" || strings.TrimSpace(content) == "" {
-			categories, _ := h.svc.GetAllCategories()
+			categories, _ := h.svc.GetAllCategories(r.Context())
 			renderTemplate(w, "create-post", createPostData{
 				Error:      "Title and content are required",
 				Title:      title,
@@ -67,9 +67,9 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = h.svc.CreatePost(user.ID, title, content, categoryIDs)
+		err = h.svc.CreatePost(r.Context(), user.ID, title, content, categoryIDs)
 		if err != nil {
-			categories, _ := h.svc.GetAllCategories()
+			categories, _ := h.svc.GetAllCategories(r.Context())
 			renderTemplate(w, "create-post", createPostData{
 				Error:      err.Error(),
 				Title:      title,
@@ -94,7 +94,7 @@ func (h *Handler) ViewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.svc.GetPostByID(id)
+	post, err := h.svc.GetPostByID(r.Context(), id)
 	if err != nil {
 		http.NotFound(w, r)
 		return

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"cmd/forum/internal/model"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -17,12 +18,21 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-
-	categories, err := h.svc.GetAllCategories()
+	categories, err := h.svc.GetAllCategories(r.Context())
+	// this part is  temporary !!!!
+	// this part is temporary !!!!
+	// fmt.Println(categories)
 	if err != nil {
+		log.Printf("category error: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
+	//return // temporary: don't continue into posts
+	//  ^
+	// / \
+	//  I
+	// this is temporary !!!!
 
 	categoryParam := r.URL.Query().Get("category")
 
@@ -31,19 +41,19 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 
 	if categoryParam != "" {
 		categoryID, err := strconv.Atoi(categoryParam)
-		if err != nil {
+		if err != nil || categoryID <= 0 {
 			http.Error(w, "Invalid category", http.StatusBadRequest)
 			return
 		}
 
-		posts, err = h.svc.GetPostsByCategory(categoryID)
+		posts, err = h.svc.GetPostsByCategory(r.Context(), categoryID)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		selectedID = categoryID
 	} else {
-		posts, err = h.svc.GetAllPosts()
+		posts, err = h.svc.GetAllPosts(r.Context())
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
