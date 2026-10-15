@@ -11,5 +11,7 @@ var (
 	ErrPasswordsDoNotMatch          = errors.New("passwords do not match")
 	ErrEmailExists                  = errors.New("an account with this email already exists")
 	ErrUsernameExists               = errors.New("that username is already taken")
+	ErrInvalidCredentials           = errors.New("invalid email or password")
+	ErrSessionExpired               = errors.New("session expired")
 	ErrNotImplemented               = errors.New("not implemented")
 )

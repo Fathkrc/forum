@@ -16,7 +16,7 @@ type createPostData struct {
 
 type postData struct {
 	Post     model.Post
-	Comments []model.Comment
+	Comments []*model.Comment
 	Error    string
 }
 

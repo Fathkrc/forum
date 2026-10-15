@@ -67,11 +67,11 @@ func (s *Service) DeleteCategory(ctx context.Context, id int) error {
 }
 
 func (s *Service) CreateComment(ctx context.Context, postID, userID int, content string) error {
-	return s.CommentService.CreateComment(postID, userID, content)
+	return s.CommentService.CreateComment(ctx, postID, userID, content)
 }
 
-func (s *Service) GetCommentsByPost(ctx context.Context, postID int) ([]model.Comment, error) {
-	return s.CommentService.GetCommentsByPost(postID)
+func (s *Service) GetCommentsByPost(ctx context.Context, postID int) ([]*model.Comment, error) {
+	return s.CommentService.GetCommentsByPost(ctx, postID)
 }
 
 func (s *Service) CreatePost(ctx context.Context, userID int, title, content string, categoryIDs []int) error {

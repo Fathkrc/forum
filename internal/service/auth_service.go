@@ -7,12 +7,16 @@ import (
 	"net/mail"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type AuthService struct {
 	userRepo    *repository.UserRepo
 	sessionRepo *repository.SessionRepo
 }
+
+const sessionDuration = 24 * time.Hour
 
 func NewAuthService(userRepo *repository.UserRepo, sessionRepo *repository.SessionRepo) *AuthService {
 	return &AuthService{userRepo: userRepo, sessionRepo: sessionRepo}
@@ -92,18 +96,63 @@ func validateRegistration(email, username, password, confirmPassword string) err
 	return nil
 }
 
+func newSessionToken() (string, error) {
+	token, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+
+	return token.String(), nil
+}
+
 func (s *AuthService) Login(email, password string) (*model.Session, error) {
-	return nil, ErrNotImplemented
+	ctx := context.Background()
+	user, err := s.userRepo.GetUserByEmail(ctx, normalizeEmail(email))
+	if err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	matches, err := VerifyPassword(password, user.PasswordHash)
+	if err != nil || !matches {
+		return nil, ErrInvalidCredentials
+	}
+
+	token, err := newSessionToken()
+	if err != nil {
+		return nil, err
+	}
+
+	session := &model.Session{
+		Token:     token,
+		UserID:    user.ID,
+		ExpiresAt: time.Now().UTC().Add(sessionDuration),
+	}
+	if err := s.sessionRepo.InsertSession(ctx, session); err != nil {
+		return nil, err
+	}
+
+	return session, nil
 }
 
 func (s *AuthService) Logout(token string) error {
-	return ErrNotImplemented
+	return s.sessionRepo.DeleteSession(context.Background(), token)
 }
 
 func (s *AuthService) GetSessionByToken(token string) (*model.Session, error) {
-	return nil, ErrNotImplemented
+	ctx := context.Background()
+	session, err := s.sessionRepo.GetSessionByToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	if !time.Now().UTC().Before(session.ExpiresAt) {
+		_ = s.sessionRepo.DeleteSession(ctx, token)
+		return nil, ErrSessionExpired
+	}
+
+	return session, nil
 }
 
 func (s *AuthService) GetUserByID(id int) (*model.User, error) {
-	return nil, ErrNotImplemented
+	return s.userRepo.GetUserByID(context.Background(), int64(id))
 }
