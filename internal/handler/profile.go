@@ -34,7 +34,7 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.svc.GetUserByID(id)
+	user, err := h.svc.GetUserByID(r.Context(), id)
 	if err != nil {
 		http.NotFound(w, r)
 		return

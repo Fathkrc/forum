@@ -20,14 +20,14 @@ type createPostData struct {
 
 type postData struct {
 	Post     model.Post
-	Comments []model.Comment
+	Comments []*model.Comment
 	Error    string
 }
 
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		categories, err := h.svc.GetAllCategories()
+		categories, err := h.svc.GetAllCategories(r.Context())
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -61,7 +61,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if strings.TrimSpace(title) == "" || strings.TrimSpace(content) == "" {
-			categories, _ := h.svc.GetAllCategories()
+			categories, _ := h.svc.GetAllCategories(r.Context())
 			renderTemplate(w, "create-post", createPostData{
 				Error:      "Title and content are required",
 				Title:      title,
@@ -73,7 +73,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		err = h.svc.CreatePost(r.Context(), user.ID, title, content, categoryIDs)
 		if err != nil {
-			categories, _ := h.svc.GetAllCategories()
+			categories, _ := h.svc.GetAllCategories(r.Context())
 			renderTemplate(w, "create-post", createPostData{
 				Error:      err.Error(),
 				Title:      title,
@@ -109,7 +109,7 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := h.svc.GetCommentsByPost(id)
+	comments, err := h.svc.GetCommentsByPost(r.Context(), id)
 	if err != nil {
 		log.Printf("GetCommentsByPost error: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

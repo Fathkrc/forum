@@ -21,7 +21,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 
-		session, err := h.svc.Login(email, password)
+		session, err := h.svc.Login(r.Context(), email, password)
 		if err != nil {
 			log.Printf("Login failed: %v", err)
 
@@ -56,7 +56,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		password := r.FormValue("password")
 		confirm := r.FormValue("confirmPassword")
 
-		err := h.svc.Register(email, username, password, confirm)
+		err := h.svc.Register(r.Context(), email, username, password, confirm)
 		if err != nil {
 			renderTemplate(w, "register", authData{Error: err.Error(), Email: email, Username: username})
 			return
@@ -75,7 +75,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = h.svc.Logout(cookie.Value)
+	_ = h.svc.Logout(r.Context(), cookie.Value)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     sessionCookieName,

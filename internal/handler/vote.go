@@ -60,7 +60,7 @@ func (h *Handler) VoteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.svc.VoteComment(user.ID, commentID, isLike)
+	err = h.svc.VoteComment(r.Context(), user.ID, commentID, isLike)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

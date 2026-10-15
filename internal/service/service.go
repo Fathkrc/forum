@@ -24,36 +24,54 @@ func New(repo *repository.Repository) *Service {
 	}
 }
 
-func (s *Service) Register(email, username, password, confirmPassword string) error {
+func (s *Service) Register(ctx context.Context, email, username, password, confirmPassword string) error {
 	return s.UserService.Register(email, username, password, confirmPassword)
 }
 
-func (s *Service) Login(email, password string) (*model.Session, error) {
+func (s *Service) Login(ctx context.Context, email, password string) (*model.Session, error) {
 	return s.UserService.Login(email, password)
 }
 
-func (s *Service) Logout(token string) error {
+func (s *Service) Logout(ctx context.Context, token string) error {
 	return s.UserService.Logout(token)
 }
 
-func (s *Service) GetSessionByToken(token string) (*model.Session, error) {
+func (s *Service) GetSessionByToken(ctx context.Context, token string) (*model.Session, error) {
 	return s.UserService.GetSessionByToken(token)
 }
 
-func (s *Service) GetUserByID(id int) (*model.User, error) {
+func (s *Service) GetUserByID(ctx context.Context, id int) (*model.User, error) {
 	return s.UserService.GetUserByID(id)
 }
 
-func (s *Service) GetAllCategories() ([]model.Category, error) {
-	return s.CategoryService.GetAllCategories()
+func (s *Service) GetAllCategories(ctx context.Context) ([]model.Category, error) {
+	return s.CategoryService.GetAllCategories(ctx)
+}
+func (s *Service) CreateCategory(
+	ctx context.Context,
+	category model.Category,
+) (*model.Category, error) {
+	return s.CategoryService.CreateCategory(ctx, category)
 }
 
-func (s *Service) CreateComment(postID, userID int, content string) error {
-	return s.CommentService.CreateComment(postID, userID, content)
+func (s *Service) GetCategoryByID(ctx context.Context, id int) (*model.Category, error) {
+	return s.CategoryService.GetCategoryByID(ctx, id)
 }
 
-func (s *Service) GetCommentsByPost(postID int) ([]model.Comment, error) {
-	return s.CommentService.GetCommentsByPost(postID)
+func (s *Service) UpdateCategory(ctx context.Context, category model.Category) error {
+	return s.CategoryService.UpdateCategory(ctx, category)
+}
+
+func (s *Service) DeleteCategory(ctx context.Context, id int) error {
+	return s.CategoryService.DeleteCategory(ctx, id)
+}
+
+func (s *Service) CreateComment(ctx context.Context, postID, userID int, content string) error {
+	return s.CommentService.CreateComment(ctx, postID, userID, content)
+}
+
+func (s *Service) GetCommentsByPost(ctx context.Context, postID int) ([]*model.Comment, error) {
+	return s.CommentService.GetCommentsByPost(ctx, postID)
 }
 
 func (s *Service) CreatePost(ctx context.Context, userID int, title, content string, categoryIDs []int) error {
@@ -88,6 +106,6 @@ func (s *Service) VotePost(ctx context.Context, userID, postID int, isLike bool)
 	return s.VoteService.VotePost(ctx, userID, postID, isLike)
 }
 
-func (s *Service) VoteComment(userID, commentID int, isLike bool) error {
+func (s *Service) VoteComment(ctx context.Context, userID, commentID int, isLike bool) error {
 	return s.VoteService.VoteComment(userID, commentID, isLike)
 }

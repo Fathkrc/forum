@@ -71,9 +71,9 @@ func (r *CategoryRepo) InsertMultiCategory(ctx context.Context, categories []*mo
 	return tx.Commit()
 }
 
-func (r *CategoryRepo) ListMultiCategory(ctx context.Context) ([]*model.Category, error) {
+func (r *CategoryRepo) ListMultiCategory(ctx context.Context) ([]model.Category, error) {
 
-	query := ` 
+	query := `
 				SELECT id, name
     			FROM categories
     			ORDER BY name
@@ -84,9 +84,9 @@ func (r *CategoryRepo) ListMultiCategory(ctx context.Context) ([]*model.Category
 		return nil, err
 	}
 	defer rows.Close()
-	var categories []*model.Category
+	var categories []model.Category
 	for rows.Next() {
-		category := &model.Category{}
+		category := model.Category{}
 		if err := rows.Scan(&category.ID, &category.Name); err != nil {
 			return nil, err
 		}
@@ -129,7 +129,7 @@ func (r *CategoryRepo) DeleteCategory(ctx context.Context, id int) error {
 }
 
 func (r *CategoryRepo) GetCategoryByID(ctx context.Context, id int) (*model.Category, error) {
-	query := ` 
+	query := `
 				SELECT id, name
     			FROM categories
     			WHERE id = ?
@@ -169,4 +169,24 @@ func (r *CategoryRepo) ListCategoriesByPost(ctx context.Context, postID int64) (
 		return nil, err
 	}
 	return categories, nil
+}
+func (r *CategoryRepo) UpdateCategory(ctx context.Context, category *model.Category) error {
+	result, err := r.db.ExecContext(ctx,
+		`UPDATE categories SET name = ? WHERE id = ?`,
+		category.Name,
+		category.ID,
+	)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }
