@@ -20,7 +20,7 @@ func New(repo *repository.Repository) *Service {
 		CategoryService: NewCategoryService(repo.CatRepo),
 		CommentService:  NewCommentService(repo.CommentRepo),
 		PostService:     NewPostService(repo.PostRepo),
-		VoteService:     NewVoteService(repo.PostRepo, repo.CommentRepo),
+		VoteService:     NewVoteService(repo.PostRepo, repo.VoteRepo, repo.CommentRepo),
 	}
 }
 
@@ -75,35 +75,35 @@ func (s *Service) GetCommentsByPost(ctx context.Context, postID int) ([]*model.C
 }
 
 func (s *Service) CreatePost(ctx context.Context, userID int, title, content string, categoryIDs []int) error {
-	return s.PostService.CreatePost(userID, title, content, categoryIDs)
+	return s.PostService.CreatePost(ctx, userID, title, content, categoryIDs)
 }
 
 func (s *Service) GetPostByID(ctx context.Context, id int) (*model.Post, error) {
-	return s.PostService.GetPostByID(id)
+	return s.PostService.GetPostByID(ctx, id)
 }
 
 func (s *Service) GetAllPosts(ctx context.Context) ([]model.Post, error) {
-	return s.PostService.GetAllPosts()
+	return s.PostService.GetAllPosts(ctx)
 }
 
 func (s *Service) GetPostsByCategory(ctx context.Context, categoryID int) ([]model.Post, error) {
-	return s.PostService.GetPostsByCategory(categoryID)
+	return s.PostService.GetPostsByCategory(ctx, categoryID)
 }
 
 func (s *Service) GetPostsByUser(ctx context.Context, userID int) ([]model.Post, error) {
-	return s.PostService.GetPostsByUser(userID)
+	return s.PostService.GetPostsByUser(ctx, userID)
 }
 
 func (s *Service) GetLikedPostsByUser(ctx context.Context, userID int) ([]model.Post, error) {
-	return s.PostService.GetLikedPostsByUser(userID)
+	return s.PostService.GetLikedPostsByUser(ctx, userID)
 }
 
 func (s *Service) SearchPosts(ctx context.Context, query string) ([]model.Post, error) {
-	return s.PostService.SearchPosts(query)
+	return s.PostService.SearchPosts(ctx, query)
 }
 
 func (s *Service) VotePost(ctx context.Context, userID, postID int, isLike bool) error {
-	return s.VoteService.VotePost(userID, postID, isLike)
+	return s.VoteService.VotePost(ctx, userID, postID, isLike)
 }
 
 func (s *Service) VoteComment(ctx context.Context, userID, commentID int, isLike bool) error {

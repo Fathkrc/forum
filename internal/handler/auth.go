@@ -1,6 +1,9 @@
 package handler
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 const sessionCookieName = "session"
 
@@ -20,7 +23,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 		session, err := h.svc.Login(r.Context(), email, password)
 		if err != nil {
-			renderTemplate(w, "login", authData{Error: "Invalid email or password", Email: email})
+			log.Printf("Login failed: %v", err)
+
+			renderTemplate(w, "login", authData{
+				Error: "Invalid email or password",
+				Email: email,
+			})
 			return
 		}
 

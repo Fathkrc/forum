@@ -2,6 +2,10 @@ package handler
 
 import (
 	"cmd/forum/internal/model"
+	"database/sql"
+	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -86,7 +90,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) ViewPost(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 	idParam := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -95,16 +99,187 @@ func (h *Handler) ViewPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post, err := h.svc.GetPostByID(r.Context(), id)
+	if errors.Is(err, sql.ErrNoRows) {
+		http.Error(w, "Post not found", http.StatusNotFound)
+		return
+	}
 	if err != nil {
-		http.NotFound(w, r)
+		log.Printf("GetPostByID error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	comments, err := h.svc.GetCommentsByPost(r.Context(), id)
 	if err != nil {
+		log.Printf("GetCommentsByPost error: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	renderTemplate(w, "post", postData{Post: *post, Comments: comments})
+}
+func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	posts, err := h.svc.GetAllPosts(r.Context())
+	if err != nil {
+		log.Printf("GetAllPosts error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No posts found.")
+		return
+	}
+	// todo : delete later
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) ListPostsByUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
+	if err != nil || userID <= 0 {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.GetPostsByUser(r.Context(), userID)
+	if err != nil {
+		log.Printf("GetPostsByUser error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No posts found for this user.")
+		return
+	}
+
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) ListPostsByCategory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categoryID, err := strconv.Atoi(r.URL.Query().Get("category"))
+	if err != nil || categoryID <= 0 {
+		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.GetPostsByCategory(r.Context(), categoryID)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No posts found in this category.")
+		return
+	}
+
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) SearchPosts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+
+	if query == "" {
+		http.Error(w, "Search query is required", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.SearchPosts(r.Context(), query)
+	if err != nil {
+		log.Printf("SearchPosts error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No matching posts found.")
+		return
+	}
+
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) ListLikedPosts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
+	if err != nil || userID <= 0 {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.svc.GetLikedPostsByUser(r.Context(), userID)
+	if err != nil {
+		log.Printf("GetLikedPosts error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	if len(posts) == 0 {
+		fmt.Fprintln(w, "No liked posts found.")
+		return
+	}
+
+	for _, post := range posts {
+		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	}
+}
+func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id <= 0 {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	post, err := h.svc.GetPostByID(r.Context(), id)
+	if errors.Is(err, sql.ErrNoRows) {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		log.Printf("GetPostByID error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "ID: %d, Title: %s, Content: %s\n",
+		post.ID, post.Title, post.Content)
 }
