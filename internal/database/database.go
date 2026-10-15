@@ -2,6 +2,9 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -88,6 +91,11 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
 				`
 
 func NewDataBase(dbName string) (*sql.DB, error) {
+	dir := filepath.Dir(dbName)
+
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return nil, fmt.Errorf("create database directory: %w", err)
+	}
 	db, err := sql.Open("sqlite3", dbName)
 	if err != nil {
 		return nil, err
