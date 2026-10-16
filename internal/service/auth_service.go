@@ -22,15 +22,13 @@ func NewAuthService(userRepo *repository.UserRepo, sessionRepo *repository.Sessi
 	return &AuthService{userRepo: userRepo, sessionRepo: sessionRepo}
 }
 
-func (s *AuthService) Register(email, username, password, confirmPassword string) error {
+func (s *AuthService) Register(ctx context.Context, email, username, password, confirmPassword string) error {
 	email = normalizeEmail(email)
 	username = strings.TrimSpace(username)
 
 	if err := validateRegistration(email, username, password, confirmPassword); err != nil {
 		return err
 	}
-
-	ctx := context.Background()
 
 	emailExists, err := s.userRepo.EmailExists(ctx, email)
 	if err != nil {
@@ -105,8 +103,7 @@ func newSessionToken() (string, error) {
 	return token.String(), nil
 }
 
-func (s *AuthService) Login(email, password string) (*model.Session, error) {
-	ctx := context.Background()
+func (s *AuthService) Login(ctx context.Context, email, password string) (*model.Session, error) {
 	user, err := s.userRepo.GetUserByEmail(ctx, normalizeEmail(email))
 	if err != nil {
 		return nil, ErrInvalidCredentials
