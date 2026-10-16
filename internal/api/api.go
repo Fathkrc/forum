@@ -2,6 +2,7 @@ package api
 
 import (
 	"cmd/forum/internal/handler"
+	"cmd/forum/internal/middleware"
 	"cmd/forum/internal/repository"
 	"cmd/forum/internal/service"
 	"database/sql"
@@ -18,9 +19,15 @@ func Run(port string, db *sql.DB) error {
 	h := handler.New(svc)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
+	var httpHandler http.Handler = mux
+
+	//httpHandler = middleware.LoadUser(svc, httpHandler)
+	httpHandler = middleware.Logger(httpHandler)
+	httpHandler = middleware.Recover(httpHandler)
+
 	server := &http.Server{
 		Addr:              ":" + port,
-		Handler:           mux,
+		Handler:           httpHandler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

@@ -1,61 +1,181 @@
+
 {{define "content"}}
-    <article>
-        <h2>{{.Post.Title}}</h2>
-        <p>By {{.Post.AuthorUsername}} on {{.Post.CreatedAt.Format "Jan 02, 2006"}}</p>
-        <p>{{.Post.Content}}</p>
-        <p>
-            Categories:
-            {{range .Post.Categories}}{{.Name}} {{end}}
-        </p>
-        <p>
-            Likes: {{.Post.Likes}} | Dislikes: {{.Post.Dislikes}} | Comments: {{.Post.CommentCount}}
-        </p>
-        <form action="/like-post" method="post">
-            <input type="hidden" name="post_id" value="{{.Post.ID}}">
-            <button type="submit">Like</button>
-        </form>
-        <form action="/dislike-post" method="post">
-            <input type="hidden" name="post_id" value="{{.Post.ID}}">
-            <button type="submit">Dislike</button>
-        </form>
-    </article>
+<div class="discussion-layout">
 
-    <section>
-        <h3>Comments</h3>
-        {{if .Comments}}
-            {{range .Comments}}
-                <article>
-                    <p>By {{.AuthorUsername}} on {{.CreatedAt.Format "Jan 02, 2006"}}</p>
-                    <p>{{.Content}}</p>
-                    <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}}</p>
-                    <form action="/like-comment" method="post">
-                        <input type="hidden" name="comment_id" value="{{.ID}}">
-                        <input type="hidden" name="post_id" value="{{$.Post.ID}}">
-                        <button type="submit">Like</button>
-                    </form>
-                    <form action="/dislike-comment" method="post">
-                        <input type="hidden" name="comment_id" value="{{.ID}}">
-                        <input type="hidden" name="post_id" value="{{$.Post.ID}}">
-                        <button type="submit">Dislike</button>
-                    </form>
-                </article>
+    <div class="discussion-main">
+
+        <!-- Back navigation -->
+        <a href="/" class="back-link">← Back to discussions</a>
+
+        <!-- Main post -->
+        <article class="card discussion-post">
+
+            <div class="post-meta">
+                <span class="post-avatar">👤</span>
+                <span class="post-author">{{.Post.AuthorUsername}}</span>
+                <span class="meta-dot">·</span>
+                <time>{{.Post.CreatedAt.Format "Jan 02, 2006"}}</time>
+            </div>
+
+            <h1 class="discussion-title">{{.Post.Title}}</h1>
+
+            {{if .Post.Categories}}
+                <div class="post-categories">
+                    {{range .Post.Categories}}
+                        <span class="category-tag">{{.Name}}</span>
+                    {{end}}
+                </div>
             {{end}}
-        {{else}}
-            <p>No comments yet.</p>
-        {{end}}
-    </section>
 
-    <section>
-        <h3>Add a Comment</h3>
-        {{if .Error}}
-            <p class="error">{{.Error}}</p>
-        {{end}}
-        <form action="/comment" method="post">
-            <input type="hidden" name="post_id" value="{{.Post.ID}}">
-            <label>Comment
-                <textarea name="content" required></textarea>
-            </label>
-            <button type="submit">Comment</button>
-        </form>
-    </section>
+            <div class="discussion-content">
+                {{.Post.Content}}
+            </div>
+
+            <div class="discussion-actions">
+
+                <div class="vote-group">
+                    <form action="/like-post" method="post">
+                        <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                        <button type="submit" class="vote-button" aria-label="Like post">
+                            👍 <span>{{.Post.Likes}}</span>
+                        </button>
+                    </form>
+
+                    <form action="/dislike-post" method="post">
+                        <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                        <button type="submit" class="vote-button" aria-label="Dislike post">
+                            👎 <span>{{.Post.Dislikes}}</span>
+                        </button>
+                    </form>
+                </div>
+
+                <a href="#comments" class="comment-count-link">
+                    💬 {{.Post.CommentCount}} Comments
+                </a>
+
+            </div>
+        </article>
+
+        <!-- Comments -->
+        <section id="comments" class="comments-section">
+
+            <div class="comments-heading">
+                <h2>Comments</h2>
+                <span class="comments-count">{{.Post.CommentCount}}</span>
+            </div>
+
+            {{if .Comments}}
+                <div class="comment-list">
+                    {{range .Comments}}
+                        <article class="card comment-card">
+
+                            <div class="post-meta">
+                                <span class="post-avatar">👤</span>
+                                <span class="post-author">{{.AuthorUsername}}</span>
+                                <span class="meta-dot">·</span>
+                                <time>{{.CreatedAt.Format "Jan 02, 2006"}}</time>
+                            </div>
+
+                            <div class="comment-content">{{.Content}}</div>
+
+                            <div class="comment-actions">
+                                <form action="/like-comment" method="post">
+                                    <input type="hidden" name="comment_id" value="{{.ID}}">
+                                    <input type="hidden" name="post_id" value="{{$.Post.ID}}">
+                                    <button type="submit" class="vote-button" aria-label="Like comment">
+                                        👍 <span>{{.Likes}}</span>
+                                    </button>
+                                </form>
+
+                                <form action="/dislike-comment" method="post">
+                                    <input type="hidden" name="comment_id" value="{{.ID}}">
+                                    <input type="hidden" name="post_id" value="{{$.Post.ID}}">
+                                    <button type="submit" class="vote-button" aria-label="Dislike comment">
+                                        👎 <span>{{.Dislikes}}</span>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </article>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="card comments-empty">
+                    <span class="comments-empty-icon">💬</span>
+                    <h3>No comments yet</h3>
+                    <p>Be the first to join the discussion.</p>
+                </div>
+            {{end}}
+
+        </section>
+
+        <!-- Add comment -->
+        <section class="card add-comment-section">
+
+            <h2>Join the discussion</h2>
+            <p>Share your thoughts with the community.</p>
+
+            {{if .Error}}
+                <div class="form-error" role="alert">{{.Error}}</div>
+            {{end}}
+
+            <form action="/comment" method="post" class="comment-form">
+                <input type="hidden" name="post_id" value="{{.Post.ID}}">
+
+                <label for="comment-content">Your comment</label>
+                <textarea
+                    id="comment-content"
+                    name="content"
+                    rows="5"
+                    placeholder="What do you think about this post?"
+                    required
+                ></textarea>
+
+                <div class="comment-form-footer">
+                    <span>Keep it friendly and respectful.</span>
+                    <button type="submit" class="btn btn-primary">
+                        Post Comment →
+                    </button>
+                </div>
+            </form>
+
+        </section>
+
+    </div>
+
+    <!-- Right sidebar -->
+    <aside class="discussion-sidebar">
+        <div class="card discussion-info">
+            <h3>About this discussion</h3>
+            <p>
+                Share your ideas, ask questions, and connect with
+                other members of Literary Lions.
+            </p>
+
+            <div class="discussion-info-row">
+                <span>Author</span>
+                <strong>{{.Post.AuthorUsername}}</strong>
+            </div>
+
+            <div class="discussion-info-row">
+                <span>Comments</span>
+                <strong>{{.Post.CommentCount}}</strong>
+            </div>
+
+            <div class="discussion-info-row">
+                <span>Published</span>
+                <strong>{{.Post.CreatedAt.Format "Jan 02, 2006"}}</strong>
+            </div>
+        </div>
+
+        <div class="card discussion-info">
+            <h3>Love reading?</h3>
+            <p>Discover more conversations from our community.</p>
+            <a href="/" class="btn btn-outline sidebar-create">
+                Explore Posts
+            </a>
+        </div>
+    </aside>
+
+</div>
 {{end}}

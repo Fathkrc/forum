@@ -1,33 +1,108 @@
+
 {{define "content"}}
-    <aside>
-        <h2>Categories</h2>
-        <ul>
-            <li><a href="/">All</a></li>
-            {{range .Categories}}
-                <li><a href="/?category={{.ID}}">{{.Name}}</a></li>
-            {{end}}
-        </ul>
+<div class="forum-layout">
+
+    <!-- Categories sidebar -->
+    <aside class="sidebar">
+        <div class="card sidebar-card">
+            <h2 class="sidebar-title">Explore</h2>
+
+            <nav class="category-list" aria-label="Post categories">
+                <a href="/" class="category-link">
+                    <span class="category-icon">🏠</span>
+                    <span>All Posts</span>
+                </a>
+
+                {{range .Categories}}
+                    <a href="/?category={{.ID}}" class="category-link">
+                        <span class="category-icon">📚</span>
+                        <span>{{.Name}}</span>
+                    </a>
+                {{end}}
+            </nav>
+        </div>
+
+        <div class="card sidebar-info">
+            <h3>Welcome to Literary Lions 🦁</h3>
+            <p>
+                Share your thoughts, discover new books,
+                and connect with other readers.
+            </p>
+            <a href="/create-post" class="btn btn-primary sidebar-create">
+                + Create a Post
+            </a>
+        </div>
     </aside>
 
-    <section>
-        <h2>Posts</h2>
+    <!-- Main post feed -->
+    <section class="feed">
+
+        <div class="feed-header">
+            <div>
+                <h1>Community Posts</h1>
+                <p>See what everyone is talking about.</p>
+            </div>
+
+            <a href="/create-post" class="btn btn-primary">
+                + New Post
+            </a>
+        </div>
+
         {{if .Posts}}
-            {{range .Posts}}
-                <article>
-                    <h3><a href="/post?id={{.ID}}">{{.Title}}</a></h3>
-                    <p>By {{.AuthorUsername}} on {{.CreatedAt.Format "Jan 02, 2006"}}</p>
-                    <p>{{.Content}}</p>
-                    <p>
-                        Categories:
-                        {{range .Categories}}{{.Name}} {{end}}
-                    </p>
-                    <p>
-                        Likes: {{.Likes}} | Dislikes: {{.Dislikes}} | Comments: {{.CommentCount}}
-                    </p>
-                </article>
-            {{end}}
+            <div class="post-list">
+                {{range .Posts}}
+                    <article class="card post-card">
+
+                        <div class="post-meta">
+                            <span class="post-avatar">👤</span>
+                            <span class="post-author">{{.AuthorUsername}}</span>
+                            <span class="meta-dot">·</span>
+                            <time>{{.CreatedAt.Format "Jan 02, 2006"}}</time>
+                        </div>
+
+                        <h2 class="post-title">
+                            <a href="/post?id={{.ID}}">
+                                {{.Title}}
+                            </a>
+                        </h2>
+
+                        <p class="post-excerpt">{{.Content}}</p>
+
+                        {{if .Categories}}
+                            <div class="post-categories">
+                                {{range .Categories}}
+                                    <span class="category-tag">{{.Name}}</span>
+                                {{end}}
+                            </div>
+                        {{end}}
+
+                        <div class="post-footer">
+                            <div class="post-stats">
+                                <span>👍 {{.Likes}}</span>
+                                <span>👎 {{.Dislikes}}</span>
+                                <span>💬 {{.CommentCount}}</span>
+                            </div>
+
+                            <a href="/post?id={{.ID}}" class="read-more">
+                                Read discussion →
+                            </a>
+                        </div>
+
+                    </article>
+                {{end}}
+            </div>
         {{else}}
-            <p>No posts found.</p>
+            <div class="card empty-state">
+                <div class="empty-icon">📭</div>
+                <h2>No posts found</h2>
+                <p>There are no discussions here yet.</p>
+                <a href="/create-post" class="btn btn-primary">
+                    Start a discussion
+                </a>
+            </div>
         {{end}}
+
     </section>
+
+</div>
 {{end}}
