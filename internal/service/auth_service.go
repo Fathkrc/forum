@@ -4,6 +4,7 @@ import (
 	"cmd/forum/internal/model"
 	"cmd/forum/internal/repository"
 	"context"
+	"errors"
 	"net/mail"
 	"strings"
 	"time"
@@ -22,15 +23,13 @@ func NewAuthService(userRepo *repository.UserRepo, sessionRepo *repository.Sessi
 	return &AuthService{userRepo: userRepo, sessionRepo: sessionRepo}
 }
 
-func (s *AuthService) Register(email, username, password, confirmPassword string) error {
+func (s *AuthService) Register(ctx context.Context, email, username, password, confirmPassword string) error {
 	email = normalizeEmail(email)
 	username = strings.TrimSpace(username)
 
 	if err := validateRegistration(email, username, password, confirmPassword); err != nil {
 		return err
 	}
-
-	ctx := context.Background()
 
 	emailExists, err := s.userRepo.EmailExists(ctx, email)
 	if err != nil {
@@ -81,6 +80,10 @@ func validateRegistration(email, username, password, confirmPassword string) err
 		return ErrUsernameRequired
 	}
 
+	if len(username) < 4 || len(username) > 12 {
+		return errors.New("Invalid Username")
+	}
+
 	if strings.TrimSpace(password) == "" {
 		return ErrPasswordRequired
 	}
@@ -105,8 +108,7 @@ func newSessionToken() (string, error) {
 	return token.String(), nil
 }
 
-func (s *AuthService) Login(email, password string) (*model.Session, error) {
-	ctx := context.Background()
+func (s *AuthService) Login(ctx context.Context, email, password string) (*model.Session, error) {
 	user, err := s.userRepo.GetUserByEmail(ctx, normalizeEmail(email))
 	if err != nil {
 		return nil, ErrInvalidCredentials
@@ -134,12 +136,11 @@ func (s *AuthService) Login(email, password string) (*model.Session, error) {
 	return session, nil
 }
 
-func (s *AuthService) Logout(token string) error {
-	return s.sessionRepo.DeleteSession(context.Background(), token)
+func (s *AuthService) Logout(ctx context.Context, token string) error {
+	return s.sessionRepo.DeleteSession(ctx, token)
 }
 
-func (s *AuthService) GetSessionByToken(token string) (*model.Session, error) {
-	ctx := context.Background()
+func (s *AuthService) GetSessionByToken(ctx context.Context, token string) (*model.Session, error) {
 	session, err := s.sessionRepo.GetSessionByToken(ctx, token)
 	if err != nil {
 		return nil, err
@@ -153,6 +154,6 @@ func (s *AuthService) GetSessionByToken(token string) (*model.Session, error) {
 	return session, nil
 }
 
-func (s *AuthService) GetUserByID(id int) (*model.User, error) {
-	return s.userRepo.GetUserByID(context.Background(), int64(id))
+func (s *AuthService) GetUserByID(ctx context.Context, id int) (*model.User, error) {
+	return s.userRepo.GetUserByID(ctx, int64(id))
 }

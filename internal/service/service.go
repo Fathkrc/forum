@@ -25,23 +25,23 @@ func New(repo *repository.Repository) *Service {
 }
 
 func (s *Service) Register(ctx context.Context, email, username, password, confirmPassword string) error {
-	return s.UserService.Register(email, username, password, confirmPassword)
+	return s.UserService.Register(ctx, email, username, password, confirmPassword)
 }
 
 func (s *Service) Login(ctx context.Context, email, password string) (*model.Session, error) {
-	return s.UserService.Login(email, password)
+	return s.UserService.Login(ctx, email, password)
 }
 
 func (s *Service) Logout(ctx context.Context, token string) error {
-	return s.UserService.Logout(token)
+	return s.UserService.Logout(ctx, token)
 }
 
 func (s *Service) GetSessionByToken(ctx context.Context, token string) (*model.Session, error) {
-	return s.UserService.GetSessionByToken(token)
+	return s.UserService.GetSessionByToken(ctx, token)
 }
 
 func (s *Service) GetUserByID(ctx context.Context, id int) (*model.User, error) {
-	return s.UserService.GetUserByID(id)
+	return s.UserService.GetUserByID(ctx, id)
 }
 
 func (s *Service) GetAllCategories(ctx context.Context) ([]model.Category, error) {
