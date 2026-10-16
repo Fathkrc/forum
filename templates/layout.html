@@ -3,23 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Literary Lions Forum</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
-    <header>
-        <h1><a href="/">Literary Lions Forum</a></h1>
-        <nav>
-            <a href="/search">Search</a>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
-            <a href="/create-post">New Post</a>
-            <a href="/my-posts">My Posts</a>
-            <a href="/liked-posts">Liked Posts</a>
-            <a href="/logout">Logout</a>
-        </nav>
+
+    <header class="site-header">
+        <div class="header-container">
+
+            <a href="/" class="logo">
+                <span class="logo-icon">🦁</span>
+                <span>Literary Lions</span>
+            </a>
+
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="/">Home</a>
+                <a href="/search">Search</a>
+                <a href="/my-posts">My Posts</a>
+                <a href="/liked-posts">Liked Posts</a>
+            </nav>
+
+            <div class="header-actions">
+                <a href="/create-post" class="btn btn-primary">
+                    + New Post
+                </a>
+
+                <a href="/login" class="btn btn-outline">
+                    Login
+                </a>
+
+                <a href="/register" class="btn btn-outline">
+                    Register
+                </a>
+            </div>
+
+        </div>
     </header>
-    <main>
+
+    <main class="page-container">
         {{template "content" .}}
     </main>
+
+    <footer class="site-footer">
+        <p>Literary Lions Forum · A place for readers to connect.</p>
+    </footer>
+
 </body>
 </html>

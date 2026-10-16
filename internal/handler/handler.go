@@ -41,7 +41,6 @@ func renderTemplate(w http.ResponseWriter, name string, data any) {
 		filepath.Join("templates", "layout.html"),
 		filepath.Join("templates", name+".html"),
 	}
-
 	tmpl, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Printf("template parse error: %v", err)
