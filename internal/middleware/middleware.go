@@ -1,6 +1,9 @@
 package middleware
 
 import (
+	"cmd/forum/internal/service"
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -26,5 +29,37 @@ func Recover(next http.Handler) http.Handler {
 		}()
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+type contextKey string
+
+const UserKey contextKey = "user"
+
+func LoadUser(svc *service.Service, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("session")
+		if err != nil || cookie.Value == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		fmt.Println(cookie.Value) // if there is no cookie it panics
+
+		session, err := svc.GetSessionByToken(r.Context(), cookie.Value)
+		fmt.Println(session)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, err := svc.GetUserByID(r.Context(), int(session.UserID))
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), UserKey, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
+
 	})
 }
