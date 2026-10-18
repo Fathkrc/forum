@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"cmd/forum/internal/middleware"
 	"cmd/forum/internal/model"
 	"cmd/forum/internal/service"
 	"html/template"
@@ -8,10 +9,6 @@ import (
 	"net/http"
 	"path/filepath"
 )
-
-type userContextKey string
-
-const UserKey userContextKey = "user"
 
 type Handler struct {
 	svc *service.Service
@@ -24,6 +21,7 @@ func New(svc *service.Service) *Handler {
 func (h *Handler) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := getUserFromContext(r); !ok {
+			log.Println("AUTH: requireAuth could not find user in context")
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
@@ -32,7 +30,7 @@ func (h *Handler) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func getUserFromContext(r *http.Request) (*model.User, bool) {
-	user, ok := r.Context().Value(UserKey).(*model.User)
+	user, ok := r.Context().Value(middleware.UserKey).(*model.User)
 	return user, ok
 }
 
