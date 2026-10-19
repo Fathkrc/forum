@@ -12,16 +12,18 @@ import (
 )
 
 type createPostData struct {
-	Error      string
-	Title      string
-	Content    string
-	Categories []model.Category
+	Error       string
+	Title       string
+	Content     string
+	Categories  []model.Category
+	CurrentUser *model.User
 }
 
 type postData struct {
-	Post     model.Post
-	Comments []*model.Comment
-	Error    string
+	Post        model.Post
+	Comments    []*model.Comment
+	Error       string
+	CurrentUser *model.User
 }
 
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +34,8 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		renderTemplate(w, "create-post", createPostData{Categories: categories})
+		user, _ := getUserFromContext(r)
+		renderTemplate(w, "create-post", createPostData{Categories: categories, CurrentUser: user})
 
 	case http.MethodPost:
 		user, ok := getUserFromContext(r)
@@ -63,10 +66,11 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		if strings.TrimSpace(title) == "" || strings.TrimSpace(content) == "" {
 			categories, _ := h.svc.GetAllCategories(r.Context())
 			renderTemplate(w, "create-post", createPostData{
-				Error:      "Title and content are required",
-				Title:      title,
-				Content:    content,
-				Categories: categories,
+				Error:       "Title and content are required",
+				Title:       title,
+				Content:     content,
+				Categories:  categories,
+				CurrentUser: user,
 			})
 			return
 		}
@@ -75,10 +79,11 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			categories, _ := h.svc.GetAllCategories(r.Context())
 			renderTemplate(w, "create-post", createPostData{
-				Error:      err.Error(),
-				Title:      title,
-				Content:    content,
-				Categories: categories,
+				Error:       err.Error(),
+				Title:       title,
+				Content:     content,
+				Categories:  categories,
+				CurrentUser: user,
 			})
 			return
 		}
@@ -97,7 +102,6 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid post id", http.StatusBadRequest)
 		return
 	}
-
 	post, err := h.svc.GetPostByID(r.Context(), id)
 	if errors.Is(err, sql.ErrNoRows) {
 		http.Error(w, "Post not found", http.StatusNotFound)
@@ -108,7 +112,7 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
+	user, _ := getUserFromContext(r)
 	comments, err := h.svc.GetCommentsByPost(r.Context(), id)
 	if err != nil {
 		log.Printf("GetCommentsByPost error: %v", err)
@@ -116,7 +120,7 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, "post", postData{Post: *post, Comments: comments})
+	renderTemplate(w, "post", postData{Post: *post, Comments: comments, CurrentUser: user})
 }
 func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

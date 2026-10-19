@@ -8,17 +8,20 @@ import (
 )
 
 type profileData struct {
-	User  model.User
-	Posts []model.Post
+	User        model.User
+	Posts       []model.Post
+	CurrentUser *model.User
 }
 
 type postsData struct {
-	Posts []model.Post
+	Posts       []model.Post
+	CurrentUser *model.User
 }
 
 type searchData struct {
-	Posts []model.Post
-	Query string
+	Posts       []model.Post
+	Query       string
+	CurrentUser *model.User
 }
 
 func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +49,7 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, "profile", profileData{User: *user, Posts: posts})
+	renderTemplate(w, "profile", profileData{User: *user, Posts: posts, CurrentUser: user})
 }
 
 func (h *Handler) MyPosts(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +70,7 @@ func (h *Handler) MyPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, "my-posts", postsData{Posts: posts})
+	renderTemplate(w, "my-posts", postsData{Posts: posts, CurrentUser: user})
 }
 
 func (h *Handler) LikedPosts(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +91,7 @@ func (h *Handler) LikedPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, "liked-posts", postsData{Posts: posts})
+	renderTemplate(w, "liked-posts", postsData{Posts: posts, CurrentUser: user})
 }
 
 func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
@@ -98,8 +101,9 @@ func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := strings.TrimSpace(r.URL.Query().Get("q"))
+	user, _ := getUserFromContext(r)
 	if query == "" {
-		renderTemplate(w, "search", searchData{})
+		renderTemplate(w, "search", searchData{CurrentUser: user})
 		return
 	}
 
@@ -109,5 +113,5 @@ func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, "search", searchData{Posts: posts, Query: query})
+	renderTemplate(w, "search", searchData{Posts: posts, Query: query, CurrentUser: user})
 }

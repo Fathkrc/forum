@@ -21,7 +21,7 @@ func Run(port string, db *sql.DB) error {
 	h.RegisterRoutes(mux)
 	var httpHandler http.Handler = mux
 
-	//httpHandler = middleware.LoadUser(svc, httpHandler)
+	httpHandler = middleware.LoadUser(svc, httpHandler)
 	httpHandler = middleware.Logger(httpHandler)
 	httpHandler = middleware.Recover(httpHandler)
 
