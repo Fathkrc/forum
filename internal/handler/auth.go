@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"cmd/forum/internal/model"
 	"log"
 	"net/http"
 )
@@ -8,15 +9,17 @@ import (
 const sessionCookieName = "session"
 
 type authData struct {
-	Error    string
-	Email    string
-	Username string
+	Error       string
+	Email       string
+	Username    string
+	CurrentUser *model.User
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		renderTemplate(w, "login", authData{})
+		user, _ := getUserFromContext(r)
+		renderTemplate(w, "login", authData{CurrentUser: user})
 	case http.MethodPost:
 		email := r.FormValue("email")
 		password := r.FormValue("password")
@@ -49,7 +52,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		renderTemplate(w, "register", authData{})
+		user, _ := getUserFromContext(r)
+		renderTemplate(w, "register", authData{CurrentUser: user})
 	case http.MethodPost:
 		email := r.FormValue("email")
 		username := r.FormValue("username")

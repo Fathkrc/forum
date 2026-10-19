@@ -8,9 +8,10 @@ import (
 )
 
 type HomeData struct {
-	Posts      []model.Post
-	Categories []model.Category
-	SelectedID int
+	Posts       []model.Post
+	Categories  []model.Category
+	SelectedID  int
+	CurrentUser *model.User
 }
 
 func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +60,12 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	user, _ := getUserFromContext(r)
 	data := HomeData{
-		Posts:      posts,
-		Categories: categories,
-		SelectedID: selectedID,
+		Posts:       posts,
+		Categories:  categories,
+		SelectedID:  selectedID,
+		CurrentUser: user,
 	}
 
 	renderTemplate(w, "home", data)

@@ -51,6 +51,6 @@ func (h *Handler) renderPostWithError(w http.ResponseWriter, r *http.Request, po
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	renderTemplate(w, "post", postData{Post: *post, Comments: comments, Error: msg})
+	user, _ := getUserFromContext(r)
+	renderTemplate(w, "post", postData{Post: *post, Comments: comments, Error: msg, CurrentUser: user})
 }
