@@ -119,6 +119,8 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+	fmt.Println(post)
+	fmt.Println(&comments)
 
 	renderTemplate(w, "post", postData{Post: *post, Comments: comments, CurrentUser: user})
 }

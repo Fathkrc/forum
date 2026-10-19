@@ -1,13 +1,26 @@
 {{define "content"}}
-    <h2>My Posts</h2>
+<div class="user-posts-page">
+    <div class="user-posts-header">
+        <h1>My Posts</h1>
+        <p>All the discussions you've started.</p>
+    </div>
+
     {{if .Posts}}
-        {{range .Posts}}
-            <article>
-                <h3><a href="/post?id={{.ID}}">{{.Title}}</a></h3>
-                <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}} | Comments: {{.CommentCount}}</p>
-            </article>
-        {{end}}
+        <div class="user-posts-list">
+            {{range .Posts}}
+                <a href="/post?id={{.ID}}" class="user-post-card">
+                    <h2>{{.Title}}</h2>
+                    <p>{{.Content}}</p>
+                    <span class="user-post-link">View discussion →</span>
+                </a>
+            {{end}}
+        </div>
     {{else}}
-        <p>You haven't created any posts yet.</p>
+        <div class="user-posts-empty">
+            <h2>No posts yet</h2>
+            <p>You haven't created any posts. Start a discussion with the community!</p>
+            <a href="/create-post" class="btn btn-primary">+ Create a Post</a>
+        </div>
     {{end}}
+</div>
 {{end}}

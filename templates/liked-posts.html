@@ -1,14 +1,26 @@
 {{define "content"}}
-    <h2>Liked Posts</h2>
+<div class="user-posts-page">
+    <div class="user-posts-header">
+        <h1>Liked Posts</h1>
+        <p>Posts you've liked and want to revisit.</p>
+    </div>
+
     {{if .Posts}}
-        {{range .Posts}}
-            <article>
-                <h3><a href="/post?id={{.ID}}">{{.Title}}</a></h3>
-                <p>By {{.AuthorUsername}}</p>
-                <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}} | Comments: {{.CommentCount}}</p>
-            </article>
-        {{end}}
+        <div class="user-posts-list">
+            {{range .Posts}}
+                <a href="/post?id={{.ID}}" class="user-post-card">
+                    <h2>{{.Title}}</h2>
+                    <p>{{.Content}}</p>
+                    <span class="user-post-link">View discussion →</span>
+                </a>
+            {{end}}
+        </div>
     {{else}}
-        <p>You haven't liked any posts yet.</p>
+        <div class="user-posts-empty">
+            <h2>No liked posts yet</h2>
+            <p>When you like a post, you'll find it here.</p>
+            <a href="/" class="btn btn-primary">Explore Posts</a>
+        </div>
     {{end}}
+</div>
 {{end}}
