@@ -107,5 +107,43 @@ func (s *Service) VotePost(ctx context.Context, userID, postID int, isLike bool)
 }
 
 func (s *Service) VoteComment(ctx context.Context, userID, commentID int, isLike bool) error {
-	return s.VoteService.VoteComment(userID, commentID, isLike)
+	return s.VoteService.VoteComment(ctx, userID, commentID, isLike)
+}
+
+func (s *Service) GetPostVote(ctx context.Context,
+	userID int64,
+	postID int64,
+) (int, error) {
+	return s.VoteService.GetPostVote(ctx, userID, postID)
+}
+
+func (s *Service) GetCommentVote(
+	ctx context.Context,
+	userID int64,
+	commentID int64,
+) (int, error) {
+	return s.VoteService.GetCommentVote(ctx, userID, commentID)
+}
+
+func (s *Service) DeletePostVote(
+	ctx context.Context,
+	userID int64,
+	postID int64,
+) error {
+	return s.VoteService.DeletePostVote(ctx, userID, postID)
+}
+
+func (s *Service) DeleteCommentVote(ctx context.Context,
+	userID int64,
+	commentID int64,
+) error {
+	return s.VoteService.DeleteCommentVote(ctx, userID, commentID)
+}
+
+func (s *Service) GetPostVoteCounts(ctx context.Context, postID int64) (int, int, error) {
+	return s.VoteService.GetPostVoteCounts(ctx, postID)
+}
+
+func (s *Service) GetCommentVoteCounts(ctx context.Context, commentID int64) (int, int, error) {
+	return s.VoteService.GetCommentVoteCounts(ctx, commentID)
 }
