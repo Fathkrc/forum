@@ -119,21 +119,7 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	for _, comment := range comments {
-		comment.Likes, comment.Dislikes, err = h.svc.GetCommentVoteCounts(r.Context(), int64(comment.ID))
-		if err != nil {
-			log.Printf("GetCommentVoteCounts %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-	}
-
-	post.Likes, post.Dislikes, err = h.svc.VoteService.GetPostVoteCounts(r.Context(), int64(post.ID))
-	if err != nil {
-		log.Printf("GetPostVoteCounts error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+	post.CommentCount = len(comments)
 	fmt.Println(post)
 	fmt.Println(&comments)
 
@@ -151,15 +137,6 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	// for _, post := range posts {
-	// 	post.Likes, post.Dislikes, err = h.svc.VoteService.GetPostVoteCounts(r.Context(), int64(post.ID))
-	// 	if err != nil {
-	// 		log.Printf("GetPostVoteCounts in ListPosts error: %v", err)
-	// 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// }
-
 	if len(posts) == 0 {
 		fmt.Fprintln(w, "No posts found.")
 		return

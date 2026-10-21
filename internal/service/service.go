@@ -18,8 +18,8 @@ func New(repo *repository.Repository) *Service {
 	return &Service{
 		UserService:     NewAuthService(repo.UserRepo, repo.SessionRepo),
 		CategoryService: NewCategoryService(repo.CatRepo),
-		CommentService:  NewCommentService(repo.CommentRepo),
-		PostService:     NewPostService(repo.PostRepo),
+		CommentService:  NewCommentService(repo.CommentRepo, repo.VoteRepo),
+		PostService:     NewPostService(repo.PostRepo, repo.VoteRepo, repo.CommentRepo),
 		VoteService:     NewVoteService(repo.PostRepo, repo.VoteRepo, repo.CommentRepo),
 	}
 }
