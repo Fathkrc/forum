@@ -120,8 +120,8 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	post.CommentCount = len(comments)
-	fmt.Println(post)
-	fmt.Println(&comments)
+	// fmt.Println(post)
+	// fmt.Println(&comments)
 
 	renderTemplate(w, "post", postData{Post: *post, Comments: comments, CurrentUser: user})
 }
@@ -142,9 +142,9 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// todo : delete later
-	for _, post := range posts {
-		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
-	}
+	// for _, post := range posts {
+	// 	fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
+	// }
 }
 func (h *Handler) ListPostsByUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

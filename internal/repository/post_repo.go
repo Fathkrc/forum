@@ -76,9 +76,10 @@ func (r *PostRepo) InsertPostWithCategories(ctx context.Context, post *model.Pos
 }
 func (r *PostRepo) GetPostByID(ctx context.Context, postID int64) (*model.Post, error) {
 	query := `
-				SELECT id, user_id, title, body, created_at
-				FROM posts
-				WHERE id = ?
+				SELECT p.id, p.user_id, p.title, p.body, p.created_at, u.username
+				FROM posts p
+				JOIN users u ON p.user_id = u.id
+				WHERE p.id = ?
 			`
 	post := &model.Post{}
 	if err := r.db.QueryRowContext(ctx, query, postID).
@@ -86,7 +87,8 @@ func (r *PostRepo) GetPostByID(ctx context.Context, postID int64) (*model.Post, 
 			&post.UserID,
 			&post.Title,
 			&post.Content,
-			&post.CreatedAt); err != nil {
+			&post.CreatedAt,
+			&post.AuthorUsername); err != nil {
 		return nil, err
 	}
 	return post, nil
@@ -95,9 +97,10 @@ func (r *PostRepo) GetPostByID(ctx context.Context, postID int64) (*model.Post, 
 func (r *PostRepo) ListAllPosts(ctx context.Context) ([]*model.Post, error) {
 
 	query := `
-					SELECT id, user_id, title, body, created_at
-					FROM posts
-					ORDER BY created_at
+					SELECT p.id, p.user_id, p.title, p.body, p.created_at, u.username
+					FROM posts p
+					JOIN users u ON p.user_id = u.id
+					ORDER BY p.created_at
 				`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
@@ -112,7 +115,8 @@ func (r *PostRepo) ListAllPosts(ctx context.Context) ([]*model.Post, error) {
 			&post.UserID,
 			&post.Title,
 			&post.Content,
-			&post.CreatedAt); err != nil {
+			&post.CreatedAt,
+			&post.AuthorUsername); err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
@@ -126,9 +130,10 @@ func (r *PostRepo) ListAllPosts(ctx context.Context) ([]*model.Post, error) {
 func (r *PostRepo) ListPostsByUser(ctx context.Context, userID int64) ([]*model.Post, error) {
 
 	query := `
-					SELECT id, user_id, title, body, created_at
-					FROM posts
-					WHERE user_id = ?
+					SELECT p.id, p.user_id, p.title, p.body, p.created_at, u.username
+					FROM posts p
+					JOIN users u ON p.user_id = u.id
+					WHERE p.user_id = ?
 				`
 	rows, err := r.db.QueryContext(ctx, query, userID)
 	if err != nil {
@@ -143,7 +148,8 @@ func (r *PostRepo) ListPostsByUser(ctx context.Context, userID int64) ([]*model.
 			&post.UserID,
 			&post.Title,
 			&post.Content,
-			&post.CreatedAt); err != nil {
+			&post.CreatedAt,
+			&post.AuthorUsername); err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
@@ -155,8 +161,9 @@ func (r *PostRepo) ListPostsByUser(ctx context.Context, userID int64) ([]*model.
 }
 func (r *PostRepo) ListLikedPostsByUser(ctx context.Context, userID int64) ([]*model.Post, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT p.id, p.user_id, p.title, p.body, p.created_at
+		SELECT p.id, p.user_id, p.title, p.body, p.created_at, u.username
 		FROM posts p
+		JOIN users u ON p.user_id = u.id
 		JOIN post_like pl ON pl.post_id = p.id
 		WHERE pl.user_id = ? AND pl.vote = 1
 		ORDER BY p.created_at DESC
@@ -177,6 +184,7 @@ func (r *PostRepo) ListLikedPostsByUser(ctx context.Context, userID int64) ([]*m
 			&post.Title,
 			&post.Content,
 			&post.CreatedAt,
+			&post.AuthorUsername,
 		)
 		if err != nil {
 			return nil, err
@@ -194,8 +202,10 @@ func (r *PostRepo) ListLikedPostsByUser(ctx context.Context, userID int64) ([]*m
 func (r *PostRepo) ListPostsByCategoryID(ctx context.Context, categoryID int64) ([]*model.Post, error) {
 
 	query := `
-					SELECT p.id, p.user_id, p.title, p.body, p.created_at
-					FROM posts p JOIN post_category pc
+					SELECT p.id, p.user_id, p.title, p.body, p.created_at, u.username
+					FROM posts p
+					JOIN users u ON p.user_id = u.id
+					JOIN post_category pc
 					ON p.id = pc.post_id
 					WHERE pc.category_id = ?
 				`
@@ -212,7 +222,8 @@ func (r *PostRepo) ListPostsByCategoryID(ctx context.Context, categoryID int64) 
 			&post.UserID,
 			&post.Title,
 			&post.Content,
-			&post.CreatedAt); err != nil {
+			&post.CreatedAt,
+			&post.AuthorUsername); err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
@@ -238,10 +249,11 @@ func (r *PostRepo) SearchPosts(ctx context.Context, searchTerm string) ([]*model
 	pattern := "%" + searchTerm + "%"
 
 	rows, err := r.db.QueryContext(ctx, `
-			SELECT id, user_id, title, body, created_at
-			FROM posts
-			WHERE title LIKE ? OR body LIKE ?
-			ORDER BY created_at DESC
+			SELECT p.id, p.user_id, p.title, p.body, p.created_at, u.username
+			FROM posts p
+			JOIN users u ON p.user_id = u.id
+			WHERE p.title LIKE ? OR p.body LIKE ?
+			ORDER BY p.created_at DESC
 		`, pattern, pattern)
 	if err != nil {
 		return nil, err
@@ -255,7 +267,9 @@ func (r *PostRepo) SearchPosts(ctx context.Context, searchTerm string) ([]*model
 			&post.UserID,
 			&post.Title,
 			&post.Content,
-			&post.CreatedAt); err != nil {
+			&post.CreatedAt,
+			&post.AuthorUsername,
+		); err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
