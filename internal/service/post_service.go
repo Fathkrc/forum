@@ -9,11 +9,17 @@ import (
 )
 
 type PostService struct {
-	postRepo *repository.PostRepo
+	postRepo    *repository.PostRepo
+	voteRepo    *repository.VoteRepo
+	commentRepo *repository.CommentRepo
 }
 
-func NewPostService(postRepo *repository.PostRepo) *PostService {
-	return &PostService{postRepo: postRepo}
+func NewPostService(postRepo *repository.PostRepo,
+	voteRepo *repository.VoteRepo,
+	commentRepo *repository.CommentRepo) *PostService {
+	return &PostService{postRepo: postRepo,
+		voteRepo:    voteRepo,
+		commentRepo: commentRepo}
 }
 
 func (s *PostService) CreatePost(ctx context.Context, userID int, title, content string, categoryIDs []int) error {
@@ -54,8 +60,22 @@ func (s *PostService) GetPostByID(ctx context.Context, id int) (*model.Post, err
 	if id <= 0 {
 		return nil, errors.New("invalid post ID")
 	}
-
-	return s.postRepo.GetPostByID(ctx, int64(id))
+	post, err := s.postRepo.GetPostByID(ctx, int64(id))
+	if err != nil {
+		return nil, err
+	}
+	likes, dislikes, err := s.voteRepo.GetPostVoteCounts(ctx, int64(id))
+	if err != nil {
+		return nil, err
+	}
+	commentCount, err := s.commentRepo.GetCommentCount(ctx, int64(id))
+	if err != nil {
+		return nil, err
+	}
+	post.Likes = likes
+	post.Dislikes = dislikes
+	post.CommentCount = commentCount
+	return post, nil
 }
 
 func (s *PostService) GetAllPosts(ctx context.Context) ([]model.Post, error) {
@@ -68,6 +88,22 @@ func (s *PostService) GetAllPosts(ctx context.Context) ([]model.Post, error) {
 
 	for _, post := range repoPosts {
 		posts = append(posts, *post)
+	}
+	for i := range posts {
+		likes, dislikes, err :=
+			s.voteRepo.GetPostVoteCounts(
+				ctx, int64(posts[i].ID),
+			)
+		if err != nil {
+			return nil, err
+		}
+		commentCount, err := s.commentRepo.GetCommentCount(ctx, int64(posts[i].ID))
+		if err != nil {
+			return nil, err
+		}
+		posts[i].CommentCount = commentCount
+		posts[i].Likes = likes
+		posts[i].Dislikes = dislikes
 	}
 
 	return posts, nil
@@ -87,7 +123,22 @@ func (s *PostService) GetPostsByCategory(ctx context.Context, categoryID int) ([
 	for _, post := range repoPosts {
 		posts = append(posts, *post)
 	}
-
+	for i := range posts {
+		likes, dislikes, err :=
+			s.voteRepo.GetPostVoteCounts(
+				ctx, int64(posts[i].ID),
+			)
+		if err != nil {
+			return nil, err
+		}
+		commentCount, err := s.commentRepo.GetCommentCount(ctx, int64(posts[i].ID))
+		if err != nil {
+			return nil, err
+		}
+		posts[i].CommentCount = commentCount
+		posts[i].Likes = likes
+		posts[i].Dislikes = dislikes
+	}
 	return posts, nil
 }
 
@@ -104,6 +155,22 @@ func (s *PostService) GetPostsByUser(ctx context.Context, userID int) ([]model.P
 	posts := make([]model.Post, 0, len(repoPosts))
 	for _, post := range repoPosts {
 		posts = append(posts, *post)
+	}
+	for i := range posts {
+		likes, dislikes, err :=
+			s.voteRepo.GetPostVoteCounts(
+				ctx, int64(posts[i].ID),
+			)
+		if err != nil {
+			return nil, err
+		}
+		commentCount, err := s.commentRepo.GetCommentCount(ctx, int64(posts[i].ID))
+		if err != nil {
+			return nil, err
+		}
+		posts[i].CommentCount = commentCount
+		posts[i].Likes = likes
+		posts[i].Dislikes = dislikes
 	}
 
 	return posts, nil
@@ -126,7 +193,22 @@ func (s *PostService) GetLikedPostsByUser(ctx context.Context,
 	for _, post := range repoPosts {
 		posts = append(posts, *post)
 	}
-
+	for i := range posts {
+		likes, dislikes, err :=
+			s.voteRepo.GetPostVoteCounts(
+				ctx, int64(posts[i].ID),
+			)
+		if err != nil {
+			return nil, err
+		}
+		commentCount, err := s.commentRepo.GetCommentCount(ctx, int64(posts[i].ID))
+		if err != nil {
+			return nil, err
+		}
+		posts[i].CommentCount = commentCount
+		posts[i].Likes = likes
+		posts[i].Dislikes = dislikes
+	}
 	return posts, nil
 }
 
@@ -146,6 +228,22 @@ func (s *PostService) SearchPosts(ctx context.Context, query string) ([]model.Po
 
 	for _, post := range repoPosts {
 		posts = append(posts, *post)
+	}
+	for i := range posts {
+		likes, dislikes, err :=
+			s.voteRepo.GetPostVoteCounts(
+				ctx, int64(posts[i].ID),
+			)
+		if err != nil {
+			return nil, err
+		}
+		commentCount, err := s.commentRepo.GetCommentCount(ctx, int64(posts[i].ID))
+		if err != nil {
+			return nil, err
+		}
+		posts[i].CommentCount = commentCount
+		posts[i].Likes = likes
+		posts[i].Dislikes = dislikes
 	}
 
 	return posts, nil

@@ -87,3 +87,13 @@ func (r *CommentRepo) GetCommentByID(ctx context.Context, commentID int64) (*mod
 	}
 	return comment, nil
 }
+
+func (r *CommentRepo) GetCommentCount(ctx context.Context, postID int64) (int, error) {
+	query := "	SELECT COUNT(*) from comments WHERE post_id = ?"
+
+	var commentCount int
+	if err := r.db.QueryRowContext(ctx, query, postID).Scan(&commentCount); err != nil {
+		return 0, err
+	}
+	return commentCount, nil
+}

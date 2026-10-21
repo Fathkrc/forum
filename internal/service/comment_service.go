@@ -10,10 +10,12 @@ import (
 
 type CommentService struct {
 	commentRepo *repository.CommentRepo
+	voteRepo    *repository.VoteRepo
 }
 
-func NewCommentService(commentRepo *repository.CommentRepo) *CommentService {
-	return &CommentService{commentRepo: commentRepo}
+func NewCommentService(commentRepo *repository.CommentRepo, voteRepo *repository.VoteRepo) *CommentService {
+	return &CommentService{commentRepo: commentRepo,
+		voteRepo: voteRepo}
 }
 
 func (s *CommentService) CreateComment(ctx context.Context, postID, userID int, content string) error {
@@ -28,5 +30,17 @@ func (s *CommentService) CreateComment(ctx context.Context, postID, userID int, 
 }
 
 func (s *CommentService) GetCommentsByPost(ctx context.Context, postID int) ([]*model.Comment, error) {
-	return s.commentRepo.ListCommentsByPost(ctx, int64(postID))
+
+	comments, err := s.commentRepo.ListCommentsByPost(ctx, int64(postID))
+	if err != nil {
+		return nil, err
+	}
+	for i := range comments {
+		comments[i].Likes, comments[i].Dislikes, err =
+			s.voteRepo.GetCommentVoteCounts(ctx, int64(comments[i].ID))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return comments, nil
 }
