@@ -3,6 +3,7 @@ package service
 import (
 	"cmd/forum/internal/repository"
 	"context"
+	"database/sql"
 	"errors"
 )
 
@@ -27,6 +28,18 @@ func (s *VoteService) VotePost(ctx context.Context,
 	if isLike {
 		vote = 1
 	}
+	currentVote, err := s.voteRepo.GetPostVote(ctx, int64(userID), int64(postID))
+	// if the vote is already like and we post like again it should delete
+	// we are assuming user liked by missclick and take it back
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+
+	if err == nil && currentVote == vote {
+		// here is the users vote is like and retrieving data is also like we delete it
+		return s.voteRepo.DeletePostVote(ctx, int64(userID), int64(postID))
+	}
 	return s.voteRepo.VotePost(
 		context.Background(),
 		int64(userID),
@@ -45,6 +58,17 @@ func (s *VoteService) VoteComment(ctx context.Context,
 	vote := -1
 	if isLike {
 		vote = 1
+	}
+	// same for comments if user has a like vote and send like again we delete its voteRepo
+	// like reddit or facebook like most of forum websites
+	currentVote, err := s.voteRepo.GetCommentVote(ctx, int64(userID), int64(commentID))
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+
+	if err == nil && currentVote == vote {
+		return s.voteRepo.DeleteCommentVote(ctx, int64(userID), int64(commentID))
 	}
 	return s.voteRepo.VoteComment(
 		ctx,
