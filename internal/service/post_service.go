@@ -248,3 +248,20 @@ func (s *PostService) SearchPosts(ctx context.Context, query string) ([]model.Po
 
 	return posts, nil
 }
+
+func (s *PostService) DeletePost(
+	ctx context.Context,
+	postID int64,
+	userID int64,
+) error {
+	post, err := s.postRepo.GetPostByID(ctx, postID)
+	if err != nil {
+		return err
+	}
+
+	if post.UserID != int(userID) {
+		return errors.New("Unauthorized")
+	}
+
+	return s.postRepo.DeletePost(ctx, postID)
+}

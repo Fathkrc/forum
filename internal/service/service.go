@@ -147,3 +147,7 @@ func (s *Service) GetPostVoteCounts(ctx context.Context, postID int64) (int, int
 func (s *Service) GetCommentVoteCounts(ctx context.Context, commentID int64) (int, int, error) {
 	return s.VoteService.GetCommentVoteCounts(ctx, commentID)
 }
+
+func (s *Service) DeletePost(ctx context.Context, postID int64, userID int64) error {
+	return s.PostService.DeletePost(ctx, postID, userID)
+}

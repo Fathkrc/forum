@@ -280,3 +280,22 @@ func (r *PostRepo) SearchPosts(ctx context.Context, searchTerm string) ([]*model
 	return posts, nil
 
 }
+
+func (r *PostRepo) DeletePost(ctx context.Context, postID int64) error {
+	result, err := r.db.ExecContext(ctx,
+		`DELETE FROM posts WHERE id = ?`, postID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
