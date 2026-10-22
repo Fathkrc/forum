@@ -5,6 +5,8 @@ import (
 	"cmd/forum/internal/repository"
 	"cmd/forum/internal/service"
 	"context"
+	"database/sql"
+	"errors"
 	"path/filepath"
 	"testing"
 )
@@ -61,7 +63,7 @@ func TestVotePost(t *testing.T) {
 		{"like post", true, 1},
 		{"change to dislike", false, -1},
 		{"change back to like", true, 1},
-		{"repeat like", true, 1},
+		{"repeat like", true, 0},
 	}
 
 	for _, tt := range tests {
@@ -81,6 +83,19 @@ func TestVotePost(t *testing.T) {
 				userID,
 				postID,
 			)
+
+			// No vote should exist after clicking like twice.
+			if tt.wantVote == 0 {
+				if !errors.Is(err, sql.ErrNoRows) {
+					t.Fatalf(
+						"expected vote to be removed, got vote=%d, err=%v",
+						got, err,
+					)
+				}
+				return
+			}
+
+			// For other cases, a vote should exist.
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -108,7 +123,7 @@ func TestVotePost(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if count != 1 {
-		t.Errorf("expected 1 vote row, got %d", count)
+	if count != 0 {
+		t.Errorf("expected 0 vote rows, got %d", count)
 	}
 }

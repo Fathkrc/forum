@@ -618,14 +618,82 @@ func TestGetPostByIDHandler(t *testing.T) {
 		})
 	}
 }
-func TestListPostsHandler(t *testing.T) {
+
+//	func TestListPostsHandler(t *testing.T) {
+//		db, svc, mux := setupPostTest(t)
+//		ctx := context.Background()
+//
+//		// Create a test user.
+//		result, err := db.ExecContext(ctx,
+//			`INSERT INTO users (username, email, password)
+//			 VALUES (?, ?, ?)`,
+//			"alice", "alice@example.com", "test-hash",
+//		)
+//		if err != nil {
+//			t.Fatal(err)
+//		}
+//
+//		userID, err := result.LastInsertId()
+//		if err != nil {
+//			t.Fatal(err)
+//		}
+//
+//		// First check the empty database.
+//		t.Run("empty posts", func(t *testing.T) {
+//			req := httptest.NewRequest(http.MethodGet, "/posts/list", nil)
+//			rec := httptest.NewRecorder()
+//
+//			mux.ServeHTTP(rec, req)
+//
+//			if rec.Code != http.StatusOK {
+//				t.Fatalf("expected 200, got %d", rec.Code)
+//			}
+//
+//			if strings.Contains(rec.Body.String(), "Dragon Post") {
+//				t.Fatal("unexpected post in empty database")
+//			}
+//		})
+//
+//		// Create two posts.
+//		for _, title := range []string{"Dragon Post", "Space Post"} {
+//			if err := svc.CreatePost(
+//				ctx, int(userID), title, "Test content", nil,
+//			); err != nil {
+//				t.Fatal(err)
+//			}
+//		}
+//
+//		t.Run("list all posts", func(t *testing.T) {
+//			req := httptest.NewRequest(http.MethodGet, "/posts/list", nil)
+//			rec := httptest.NewRecorder()
+//
+//			mux.ServeHTTP(rec, req)
+//
+//			if rec.Code != http.StatusOK {
+//				t.Fatalf("expected 200, got %d: %s",
+//					rec.Code, rec.Body.String())
+//			}
+//
+//			body := rec.Body.String()
+//
+//			if !strings.Contains(body, "Dragon Post") {
+//				t.Error("Dragon Post missing")
+//			}
+//
+//			if !strings.Contains(body, "Space Post") {
+//				t.Error("Space Post missing")
+//			}
+//		})
+//	}
+func TestHomeHandler(t *testing.T) {
+	t.Chdir("../..") // this is for test to see out packages
 	db, svc, mux := setupPostTest(t)
 	ctx := context.Background()
 
 	// Create a test user.
 	result, err := db.ExecContext(ctx,
 		`INSERT INTO users (username, email, password)
-		 VALUES (?, ?, ?)`,
+         VALUES (?, ?, ?)`,
 		"alice", "alice@example.com", "test-hash",
 	)
 	if err != nil {
@@ -637,23 +705,23 @@ func TestListPostsHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// First check the empty database.
-	t.Run("empty posts", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/posts/list", nil)
+	t.Run("empty homepage", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		rec := httptest.NewRecorder()
 
 		mux.ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusOK {
-			t.Fatalf("expected 200, got %d", rec.Code)
+			t.Fatalf("expected 200, got %d: %s",
+				rec.Code, rec.Body.String())
 		}
 
-		if strings.Contains(rec.Body.String(), "Dragon Post") {
-			t.Fatal("unexpected post in empty database")
+		if !strings.Contains(rec.Body.String(), "No posts found") {
+			t.Error("expected empty state message")
 		}
 	})
 
-	// Create two posts.
+	// Create posts through the service layer.
 	for _, title := range []string{"Dragon Post", "Space Post"} {
 		if err := svc.CreatePost(
 			ctx, int(userID), title, "Test content", nil,
@@ -662,8 +730,8 @@ func TestListPostsHandler(t *testing.T) {
 		}
 	}
 
-	t.Run("list all posts", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/posts/list", nil)
+	t.Run("homepage displays posts", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		rec := httptest.NewRecorder()
 
 		mux.ServeHTTP(rec, req)
@@ -676,11 +744,19 @@ func TestListPostsHandler(t *testing.T) {
 		body := rec.Body.String()
 
 		if !strings.Contains(body, "Dragon Post") {
-			t.Error("Dragon Post missing")
+			t.Error("Dragon Post missing from homepage")
 		}
 
 		if !strings.Contains(body, "Space Post") {
-			t.Error("Space Post missing")
+			t.Error("Space Post missing from homepage")
+		}
+
+		if !strings.Contains(body, "alice") {
+			t.Error("post author missing from homepage")
+		}
+
+		if !strings.Contains(body, `class="post-title"`) {
+			t.Error("expected posts to be rendered using the HTML template")
 		}
 	})
 }
