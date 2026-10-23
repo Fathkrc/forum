@@ -6,6 +6,8 @@ import (
 	"cmd/forum/internal/repository"
 	"cmd/forum/internal/service"
 	"context"
+	"database/sql"
+	"errors"
 	"path/filepath"
 	"testing"
 )
@@ -509,4 +511,96 @@ func TestSearchPosts(t *testing.T) {
 
 	t.Log("Unrelated posts are excluded")
 	t.Log("SearchPosts works correctly!")
+}
+func TestDeletePost(t *testing.T) {
+	ctx := context.Background()
+
+	db, err := database.NewDataBase(
+		filepath.Join(t.TempDir(), "delete_test.db"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	repo := repository.NewRepository(db)
+	svc := service.New(repo)
+
+	// Create Alice.
+	result, err := db.ExecContext(ctx,
+		`INSERT INTO users (username, email, password)
+         VALUES (?, ?, ?)`,
+		"alice", "alice@example.com", "test-hash",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	aliceID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Create Bob.
+	result, err = db.ExecContext(ctx,
+		`INSERT INTO users (username, email, password)
+         VALUES (?, ?, ?)`,
+		"bob", "bob@example.com", "test-hash",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bobID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Alice creates a post.
+	result, err = db.ExecContext(ctx,
+		`INSERT INTO posts (user_id, title, body)
+         VALUES (?, ?, ?)`,
+		aliceID, "Alice's Post", "Test content",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	postID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("Bob cannot delete Alice's post", func(t *testing.T) {
+		err := svc.DeletePost(ctx, postID, bobID)
+
+		if !errors.Is(err, service.ErrUnauthorized) {
+			t.Fatalf("expected unauthorized error, got %v", err)
+		}
+
+		// Verify the post still exists.
+		_, err = repo.PostRepo.GetPostByID(ctx, postID)
+		if err != nil {
+			t.Fatalf("post should still exist: %v", err)
+		}
+	})
+
+	t.Run("Alice can delete her own post", func(t *testing.T) {
+		err := svc.DeletePost(ctx, postID, aliceID)
+		if err != nil {
+			t.Fatalf("expected successful deletion, got %v", err)
+		}
+
+		// Verify the post is gone.
+		_, err = repo.PostRepo.GetPostByID(ctx, postID)
+
+		if !errors.Is(err, sql.ErrNoRows) {
+			t.Fatalf("expected post to be deleted, got %v", err)
+		}
+	})
+
+	t.Run("deleting nonexistent post", func(t *testing.T) {
+		err := svc.DeletePost(ctx, postID, aliceID)
+
+		if !errors.Is(err, sql.ErrNoRows) {
+			t.Fatalf("expected sql.ErrNoRows, got %v", err)
+		}
+	})
 }

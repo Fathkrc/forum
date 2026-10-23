@@ -14,4 +14,5 @@ var (
 	ErrInvalidCredentials           = errors.New("invalid email or password")
 	ErrSessionExpired               = errors.New("session expired")
 	ErrNotImplemented               = errors.New("not implemented")
+	ErrUnauthorized                 = errors.New("unauthorized")
 )

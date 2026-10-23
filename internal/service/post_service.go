@@ -260,7 +260,7 @@ func (s *PostService) DeletePost(
 	}
 
 	if post.UserID != int(userID) {
-		return errors.New("Unauthorized")
+		return ErrUnauthorized
 	}
 
 	return s.postRepo.DeletePost(ctx, postID)
