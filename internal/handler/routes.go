@@ -20,6 +20,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/posts/list", h.ListPosts)
 	mux.HandleFunc("/posts/test-view", h.TestGetPost)
 	mux.HandleFunc("/posts/category", h.ListPostsByCategory)
+	mux.HandleFunc("/post/delete", h.DeletePost)
 
 	mux.HandleFunc("/like-comment", h.requireAuth(h.VoteComment))
 	mux.HandleFunc("/dislike-comment", h.requireAuth(h.VoteComment))

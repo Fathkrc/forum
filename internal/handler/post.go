@@ -286,3 +286,47 @@ func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "ID: %d, Title: %s, Content: %s\n",
 		post.ID, post.Title, post.Content)
 }
+
+func (h *Handler) DeletePost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed",
+			http.StatusMethodNotAllowed)
+		return
+	}
+	postid := r.URL.Query().Get("id")
+	id, err := strconv.ParseInt(postid, 10, 64)
+
+	if err != nil {
+		http.Error(w, "Invalid post ID",
+			http.StatusBadRequest)
+		return
+	}
+
+	user, ok := getUserFromContext(r)
+	if !ok || user == nil {
+		http.Error(w, "Unauthorized",
+			http.StatusUnauthorized)
+		return
+	}
+
+	err = h.svc.DeletePost(
+		r.Context(), id, int64(user.ID),
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			http.Error(w, "Post not found",
+				http.StatusNotFound)
+		case errors.Is(err, errors.New("Unauthorized")):
+			http.Error(w, "Unauthorized Action",
+				http.StatusForbidden)
+		default:
+			log.Printf("DeletePost error: %v", err)
+			http.Error(w, "Internal Server Error",
+				http.StatusInternalServerError)
+		}
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}

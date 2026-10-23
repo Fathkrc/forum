@@ -13,7 +13,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
 				id 	INTEGER PRIMARY KEY AUTOINCREMENT,
 				username TEXT NOT NULL UNIQUE,
     			email TEXT NOT NULL UNIQUE,
-				password TEXT nOT NULL,
+				password TEXT NOT NULL,
 				created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 				);
 
@@ -22,7 +22,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
 				user_id INTEGER NOT NULL,
 				expires_at DATETIME NOT NULL,
 
-				FOREIGN KEY (user_id) REFERENCES users(id)
+				FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 				);
 
 				CREATE TABLE IF NOT EXISTS posts (
@@ -42,7 +42,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
     			content TEXT NOT NULL,
     			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    			FOREIGN KEY (post_id) REFERENCES posts(id),
+    			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     			FOREIGN KEY (user_id) REFERENCES users(id)
 				);
 
@@ -62,7 +62,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
     			CHECK (vote IN (-1, 1)),
 
     			FOREIGN KEY (user_id) REFERENCES users(id),
-    			FOREIGN KEY (post_id) REFERENCES posts(id)
+    			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 				);
 
 				CREATE TABLE IF NOT EXISTS comment_like (
@@ -75,7 +75,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
     			CHECK (vote IN (-1, 1)),
 
     			FOREIGN KEY (user_id) REFERENCES users(id),
-				FOREIGN KEY (comment_id) REFERENCES comments(id)
+				FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE
 				);
 
 				CREATE TABLE IF NOT EXISTS post_category (
@@ -84,7 +84,7 @@ const schema = `  CREATE TABLE IF NOT EXISTS users (
 
     			PRIMARY KEY (post_id, category_id),
 
-   				FOREIGN KEY (post_id) REFERENCES posts(id),
+   				FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     			FOREIGN KEY (category_id) REFERENCES categories(id)
 				);
 
