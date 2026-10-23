@@ -42,7 +42,7 @@ func (r *CommentRepo) ListCommentsByPost(ctx context.Context, postID int64) ([]*
 	query := `
 				SELECT c.id, c.post_id ,c.user_id, c.content, c.created_at, u.username
 				FROM comments c JOIN users u
-				ON c.user_id = u.id 
+				ON c.user_id = u.id
 				WHERE c.post_id = ?
 				ORDER BY c.created_at
 			`
@@ -72,7 +72,7 @@ func (r *CommentRepo) ListCommentsByPost(ctx context.Context, postID int64) ([]*
 
 func (r *CommentRepo) GetCommentByID(ctx context.Context, commentID int64) (*model.Comment, error) {
 	query := `
-				SELECT id, post_id, user_id, content, created_at 
+				SELECT id, post_id, user_id, content, created_at
 				FROM comments
 				where id = ?
 			`
@@ -96,4 +96,22 @@ func (r *CommentRepo) GetCommentCount(ctx context.Context, postID int64) (int, e
 		return 0, err
 	}
 	return commentCount, nil
+}
+func (r *CommentRepo) DeleteComment(ctx context.Context, commentID int64) error {
+	result, err := r.db.ExecContext(ctx,
+		`DELETE FROM comments WHERE id = ?`, commentID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }
