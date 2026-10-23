@@ -24,6 +24,7 @@ type postData struct {
 	Comments    []*model.Comment
 	Error       string
 	CurrentUser *model.User
+	IsOwner     bool
 }
 
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
@@ -119,11 +120,12 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+	isOwner := user != nil && user.ID == post.UserID
 	post.CommentCount = len(comments)
 	// fmt.Println(post)
 	// fmt.Println(&comments)
 
-	renderTemplate(w, "post", postData{Post: *post, Comments: comments, CurrentUser: user})
+	renderTemplate(w, "post", postData{Post: *post, Comments: comments, CurrentUser: user, IsOwner: isOwner})
 }
 func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -261,6 +263,7 @@ func (h *Handler) ListLikedPosts(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ID: %d, Title: %s\n", post.ID, post.Title)
 	}
 }
+
 func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -293,7 +296,7 @@ func (h *Handler) DeletePost(w http.ResponseWriter, r *http.Request) {
 			http.StatusMethodNotAllowed)
 		return
 	}
-	postid := r.URL.Query().Get("id")
+	postid := r.FormValue("post_id")
 	id, err := strconv.ParseInt(postid, 10, 64)
 
 	if err != nil {
@@ -308,7 +311,7 @@ func (h *Handler) DeletePost(w http.ResponseWriter, r *http.Request) {
 			http.StatusUnauthorized)
 		return
 	}
-
+	log.Printf("DELETE DEBUG: postID=%d userID=%d", id, user.ID)
 	err = h.svc.DeletePost(
 		r.Context(), id, int64(user.ID),
 	)

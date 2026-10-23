@@ -1163,3 +1163,39 @@ a:hover {
         padding: 20px;
     }
 }
+.btn-delete {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+}
+/* Delete comment button */
+.btn-delete-comment {
+    background: transparent;
+    color: #9ca3af;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-comment:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.btn-delete-comment:focus-visible {
+    outline: 2px solid #b91c1c;
+    outline-offset: 2px;
+}

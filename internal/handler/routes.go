@@ -16,15 +16,16 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/post", h.GetPostById)
 	mux.HandleFunc("/like-post", h.requireAuth(h.VotePost))
 	mux.HandleFunc("/dislike-post", h.requireAuth(h.VotePost))
-	mux.HandleFunc("/posts/liked", h.ListLikedPosts)
+	mux.HandleFunc("/posts/liked", h.requireAuth(h.ListLikedPosts))
 	mux.HandleFunc("/posts/list", h.ListPosts)
 	mux.HandleFunc("/posts/test-view", h.TestGetPost)
 	mux.HandleFunc("/posts/category", h.ListPostsByCategory)
-	mux.HandleFunc("/post/delete", h.DeletePost)
+	mux.HandleFunc("/posts/delete", h.requireAuth(h.DeletePost))
 
 	mux.HandleFunc("/like-comment", h.requireAuth(h.VoteComment))
 	mux.HandleFunc("/dislike-comment", h.requireAuth(h.VoteComment))
 	mux.HandleFunc("/comment", h.requireAuth(h.AddComment))
+	mux.HandleFunc("/comments/delete", h.requireAuth(h.DeleteComment))
 
 	mux.HandleFunc("/categories", h.ListCategories)
 	mux.HandleFunc("/categories/create", h.CreateCategory)

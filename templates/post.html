@@ -42,11 +42,23 @@
                     </form>
 
                     <form action="/dislike-post" method="post">
-                        <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                        <button type="submit" class="vote-button" aria-label="Dislike post">
-                            👎 <span>{{.Post.Dislikes}}</span>
-                        </button>
-                    </form>
+                               <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                               <button type="submit" class="vote-button" aria-label="Dislike post">
+                                   👎 <span>{{.Post.Dislikes}}</span>
+                               </button>
+                           </form>
+
+                           <!-- Delete -->
+                           {{if .IsOwner}}
+                           <form action="/posts/delete?id={{.Post.ID}}" method="post"
+                                 onsubmit="return confirm('Delete this post permanently?');">
+                                         <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                               <button type="submit" class="btn-delete">
+                                   Delete Post
+                               </button>
+                           </form>
+                           {{end}}
+
                 </div>
 
                 <a href="#comments" class="comment-count-link">
@@ -94,6 +106,20 @@
                                         👎 <span>{{.Dislikes}}</span>
                                     </button>
                                 </form>
+                                {{if $.CurrentUser}}
+                                       {{if eq $.CurrentUser.ID .UserID}}
+                                           <form action="/comments/delete" method="post"
+                                                 onsubmit="return confirm('Delete this comment?');">
+
+                                               <input type="hidden" name="comment_id" value="{{.ID}}">
+                                               <input type="hidden" name="post_id" value="{{$.Post.ID}}">
+
+                                               <button type="submit" class="btn-delete-comment">
+                                                   Delete
+                                               </button>
+                                           </form>
+                                       {{end}}
+                                   {{end}}
                             </div>
 
                         </article>

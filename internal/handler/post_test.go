@@ -2,6 +2,8 @@ package handler
 
 import (
 	"cmd/forum/internal/database"
+	"cmd/forum/internal/middleware"
+	"cmd/forum/internal/model"
 	"cmd/forum/internal/repository"
 	"cmd/forum/internal/service"
 	"context"
@@ -482,8 +484,16 @@ func TestListLikedPostsHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
-			rec := httptest.NewRecorder()
 
+			// Authenticate Alice for this request.
+			user := &model.User{
+				ID: int(userID),
+			}
+
+			ctx := context.WithValue(req.Context(), middleware.UserKey, user)
+			req = req.WithContext(ctx)
+
+			rec := httptest.NewRecorder()
 			mux.ServeHTTP(rec, req)
 
 			if rec.Code != tt.wantStatus {

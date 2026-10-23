@@ -124,7 +124,9 @@ func (s *Service) GetCommentVote(
 ) (int, error) {
 	return s.VoteService.GetCommentVote(ctx, userID, commentID)
 }
-
+func (s *Service) DeleteComment(ctx context.Context, commentID, userID int64) error {
+	return s.CommentService.DeleteComment(ctx, commentID, userID)
+}
 func (s *Service) DeletePostVote(
 	ctx context.Context,
 	userID int64,

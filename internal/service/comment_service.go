@@ -44,3 +44,15 @@ func (s *CommentService) GetCommentsByPost(ctx context.Context, postID int) ([]*
 	}
 	return comments, nil
 }
+func (s *CommentService) DeleteComment(ctx context.Context, commentID, userID int64) error {
+	comment, err := s.commentRepo.GetCommentByID(ctx, commentID)
+	if err != nil {
+		return err
+	}
+
+	if int64(comment.UserID) != userID {
+		return errors.New("unauthorize") //change this to custom error
+	}
+
+	return s.commentRepo.DeleteComment(ctx, commentID)
+}
