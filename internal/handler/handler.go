@@ -66,9 +66,10 @@ func renderError(w http.ResponseWriter, code int, title, message string) {
 	w.WriteHeader(code)
 
 	renderTemplate(w, "error", struct {
-		Code    int
-		Title   string
-		Message string
+		Code        int
+		Title       string
+		Message     string
+		CurrentUser *model.User
 	}{
 		Code:    code,
 		Title:   title,
