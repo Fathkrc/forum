@@ -37,5 +37,34 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/my-posts", h.requireAuth(h.MyPosts))
 	mux.HandleFunc("/liked-posts", h.requireAuth(h.LikedPosts))
 	mux.HandleFunc("/search", h.Search)
+
+	//error checkers
+	// Error page testing (remove before submission)
+	mux.HandleFunc("/test-400", func(w http.ResponseWriter, r *http.Request) {
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request", "The request is invalid.")
+	})
+
+	mux.HandleFunc("/test-401", func(w http.ResponseWriter, r *http.Request) {
+		renderError(w, http.StatusUnauthorized,
+			"Login Required", "Please log in to continue.")
+	})
+
+	mux.HandleFunc("/test-403", func(w http.ResponseWriter, r *http.Request) {
+		renderError(w, http.StatusForbidden,
+			"Access Denied", "You don't have permission to access this page.")
+	})
+
+	mux.HandleFunc("/test-404", func(w http.ResponseWriter, r *http.Request) {
+		renderNotFound(w)
+	})
+
+	mux.HandleFunc("/test-405", func(w http.ResponseWriter, r *http.Request) {
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed", "This request method is not supported.")
+	})
+	mux.HandleFunc("/test-500", func(w http.ResponseWriter, r *http.Request) {
+		renderInternalError(w)
+	})
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 }
