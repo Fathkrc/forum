@@ -51,7 +51,7 @@ func (s *CommentService) DeleteComment(ctx context.Context, commentID, userID in
 	}
 
 	if int64(comment.UserID) != userID {
-		return errors.New("unauthorize") //change this to custom error
+		return ErrUnauthorized
 	}
 
 	return s.commentRepo.DeleteComment(ctx, commentID)

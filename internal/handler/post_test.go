@@ -11,11 +11,18 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	if err := os.Chdir("../.."); err != nil {
+		panic(err)
+	}
+	os.Exit(m.Run())
+}
 func TestSearchPostsHandler(t *testing.T) {
 	// 1. Create a temporary SQLite database.
 	dbPath := filepath.Join(t.TempDir(), "test.db")
@@ -106,7 +113,7 @@ func TestSearchPostsHandler(t *testing.T) {
 			name:         "empty search query",
 			url:          "/posts/search?q=",
 			wantStatus:   http.StatusBadRequest,
-			wantContains: []string{"Search query is required"},
+			wantContains: []string{"A search query is required."},
 		},
 	}
 
@@ -356,13 +363,13 @@ func TestListPostsByUserHandler(t *testing.T) {
 			name:         "invalid user ID",
 			url:          "/posts/user?user=abc",
 			wantStatus:   http.StatusBadRequest,
-			wantContains: "Invalid user ID",
+			wantContains: "The user ID is invalid.",
 		},
 		{
 			name:         "missing user ID",
 			url:          "/posts/user",
 			wantStatus:   http.StatusBadRequest,
-			wantContains: "Invalid user ID",
+			wantContains: "The user ID is invalid.",
 		},
 	}
 

@@ -51,3 +51,27 @@ func renderTemplate(w http.ResponseWriter, name string, data any) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
+func renderNotFound(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusNotFound)
+	renderTemplate(w, "404", nil)
+}
+func renderInternalError(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusInternalServerError)
+	renderTemplate(w, "500", nil)
+}
+func renderError(w http.ResponseWriter, code int, title, message string) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(code)
+
+	renderTemplate(w, "error", struct {
+		Code    int
+		Title   string
+		Message string
+	}{
+		Code:    code,
+		Title:   title,
+		Message: message,
+	})
+}

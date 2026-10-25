@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"cmd/forum/internal/service"
 	"database/sql"
 	"errors"
 	"log"
@@ -11,13 +12,17 @@ import (
 
 func (h *Handler) AddComment(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	postID, err := strconv.Atoi(r.FormValue("post_id"))
-	if err != nil {
-		http.Error(w, "Invalid post id", http.StatusBadRequest)
+	if err != nil || postID <= 0 {
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The post ID is invalid.")
 		return
 	}
 
@@ -35,7 +40,8 @@ func (h *Handler) AddComment(w http.ResponseWriter, r *http.Request) {
 
 	err = h.svc.CreateComment(r.Context(), postID, user.ID, content)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("CreateComment error: %v", err)
+		renderInternalError(w)
 		return
 	}
 
@@ -44,14 +50,20 @@ func (h *Handler) AddComment(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) renderPostWithError(w http.ResponseWriter, r *http.Request, postID int, msg string) {
 	post, err := h.svc.GetPostByID(r.Context(), postID)
+	if errors.Is(err, sql.ErrNoRows) {
+		renderNotFound(w)
+		return
+	}
 	if err != nil {
-		http.NotFound(w, r)
+		log.Printf("GetPostByID error: %v", err)
+		renderInternalError(w)
 		return
 	}
 
 	comments, err := h.svc.GetCommentsByPost(r.Context(), postID)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("GetCommentsByPost error: %v", err)
+		renderInternalError(w)
 		return
 	}
 	user, _ := getUserFromContext(r)
@@ -59,21 +71,27 @@ func (h *Handler) renderPostWithError(w http.ResponseWriter, r *http.Request, po
 }
 func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	// Get comment ID from the form
 	commentID, err := strconv.ParseInt(r.FormValue("comment_id"), 10, 64)
 	if err != nil || commentID <= 0 {
-		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The comment ID is invalid.")
 		return
 	}
 
 	// Get logged-in user
 	user, ok := getUserFromContext(r)
 	if !ok || user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		renderError(w, http.StatusUnauthorized,
+			"Login Required",
+			"Please log in to continue.")
 		return
 	}
 
@@ -82,14 +100,15 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			http.Error(w, "Comment not found", http.StatusNotFound)
-
-		case errors.Is(err, errors.New("unauthorized")): //change to custom
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			renderNotFound(w)
+		case errors.Is(err, service.ErrUnauthorized):
+			renderError(w, http.StatusForbidden,
+				"Access Denied",
+				"You don't have permission to delete this comment.")
 
 		default:
 			log.Printf("DeleteComment error: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			renderInternalError(w)
 		} // we should make a global switch case for errors : optional
 		return
 	}
