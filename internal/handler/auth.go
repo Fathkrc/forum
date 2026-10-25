@@ -45,7 +45,10 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
+		return
 	}
 }
 
@@ -68,11 +71,21 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 	}
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", "POST")
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
+
+		return
+	}
 	cookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
