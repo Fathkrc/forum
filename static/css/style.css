@@ -1199,3 +1199,65 @@ a:hover {
     outline: 2px solid #b91c1c;
     outline-offset: 2px;
 }
+.not-found {
+    max-width: 600px;
+    margin: 100px auto;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.not-found-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.not-found h1 {
+    font-size: 100px;
+    font-weight: 800;
+    color: #d97706;
+    margin: 0;
+}
+
+.not-found h2 {
+    font-size: 26px;
+    margin: 15px 0;
+    color: #1f2937;
+}
+
+.not-found p {
+    font-size: 16px;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+.btn-home {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #d97706;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-home:hover {
+    background: #b45309;
+}
+.logout-form {
+    display: inline;
+    margin: 0;
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    text-decoration: underline;
+}

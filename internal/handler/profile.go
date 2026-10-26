@@ -2,6 +2,9 @@ package handler
 
 import (
 	"cmd/forum/internal/model"
+	"database/sql"
+	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,35 +29,52 @@ type searchData struct {
 
 func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	idParam := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		http.Error(w, "Invalid user id", http.StatusBadRequest)
+	if err != nil || id <= 0 {
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The user ID is invalid.")
 		return
 	}
 
 	user, err := h.svc.GetUserByID(r.Context(), id)
+	if errors.Is(err, sql.ErrNoRows) {
+		renderNotFound(w)
+		return
+	}
 	if err != nil {
-		http.NotFound(w, r)
+		log.Printf("GetUserByID error: %v", err)
+		renderInternalError(w)
 		return
 	}
 
 	posts, err := h.svc.GetPostsByUser(r.Context(), id)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("GetPostsByUser error: %v", err)
+		renderInternalError(w)
 		return
 	}
+	currentUser, _ := getUserFromContext(r)
 
-	renderTemplate(w, "profile", profileData{User: *user, Posts: posts, CurrentUser: user})
+	renderTemplate(w, "profile", profileData{
+		User:        *user,
+		Posts:       posts,
+		CurrentUser: currentUser,
+	})
 }
 
 func (h *Handler) MyPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
@@ -66,7 +86,8 @@ func (h *Handler) MyPosts(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := h.svc.GetPostsByUser(r.Context(), user.ID)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("MyPosts GetPostsByUser error: %v", err)
+		renderInternalError(w)
 		return
 	}
 
@@ -75,7 +96,9 @@ func (h *Handler) MyPosts(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) LikedPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
@@ -87,7 +110,8 @@ func (h *Handler) LikedPosts(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := h.svc.GetLikedPostsByUser(r.Context(), user.ID)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("LikedPosts error: %v", err)
+		renderInternalError(w)
 		return
 	}
 
@@ -96,7 +120,9 @@ func (h *Handler) LikedPosts(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
@@ -109,7 +135,8 @@ func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := h.svc.SearchPosts(r.Context(), query)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("SearchPosts error: %v", err)
+		renderInternalError(w)
 		return
 	}
 
