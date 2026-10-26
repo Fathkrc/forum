@@ -37,17 +37,12 @@ func TestCreatePost(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// Create a category.
-	result, err = db.ExecContext(ctx,
-		`INSERT INTO categories (name) VALUES (?)`,
+	// Use the embedded Fantasy category.
+	var categoryID int64
+	err = db.QueryRowContext(ctx,
+		`SELECT id FROM categories WHERE name = ?`,
 		"Fantasy",
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	categoryID, err := result.LastInsertId()
+	).Scan(&categoryID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,30 +141,22 @@ func TestPostsByCategoryFiltering(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Create Fantasy category
-	result, err = db.ExecContext(ctx,
-		`INSERT INTO categories (name) VALUES (?)`,
+	// Use the embedded Fantasy category.
+	var fantasyID int64
+	err = db.QueryRowContext(ctx,
+		`SELECT id FROM categories WHERE name = ?`,
 		"Fantasy",
-	)
+	).Scan(&fantasyID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fantasyID, err := result.LastInsertId()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Create Science Fiction category
-	result, err = db.ExecContext(ctx,
-		`INSERT INTO categories (name) VALUES (?)`,
+	// Use the embedded Science Fiction category.
+	var scifiID int64
+	err = db.QueryRowContext(ctx,
+		`SELECT id FROM categories WHERE name = ?`,
 		"Science Fiction",
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	scifiID, err := result.LastInsertId()
+	).Scan(&scifiID)
 	if err != nil {
 		t.Fatal(err)
 	}
