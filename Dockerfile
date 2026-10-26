@@ -18,7 +18,7 @@ RUN go mod download
 COPY . .
 
 # Compile the application.
-RUN CGO_ENABLED=1 go build -o /forum .
+RUN CGO_ENABLED=1 go build -o /forum ./cmd/forum
 
 # Stage 2: Create a smaller runtime image.
 FROM debian:bookworm-slim
@@ -36,7 +36,7 @@ COPY --from=builder /forum /app/forum
 # Copy runtime assets (adjust these paths to your project).
 COPY --from=builder /src/templates /app/templates
 # Uncomment and adapt if your project has a static directory:
-# COPY --from=builder /src/static /app/static
+COPY --from=builder /src/static /app/static
 
 # Docker image metadata.
 LABEL org.opencontainers.image.title="Literary Lions Forum" \
