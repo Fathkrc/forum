@@ -158,6 +158,7 @@ func TestSearchPostsHandler(t *testing.T) {
 		})
 	}
 }
+
 func TestListPostsByCategoryHandler(t *testing.T) {
 	ctx := context.Background()
 
@@ -192,29 +193,21 @@ func TestListPostsByCategoryHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Create two categories
-	result, err = db.ExecContext(ctx,
-		`INSERT INTO categories (name) VALUES (?)`,
+	// Get the embedded categories
+	var fantasyID int64
+	err = db.QueryRowContext(ctx,
+		"SELECT id FROM categories WHERE name = ?",
 		"Fantasy",
-	)
+	).Scan(&fantasyID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fantasyID, err := result.LastInsertId()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	result, err = db.ExecContext(ctx,
-		`INSERT INTO categories (name) VALUES (?)`,
+	var scifiID int64
+	err = db.QueryRowContext(ctx,
+		"SELECT id FROM categories WHERE name = ?",
 		"Science Fiction",
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	scifiID, err := result.LastInsertId()
+	).Scan(&scifiID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -270,6 +263,7 @@ func TestListPostsByCategoryHandler(t *testing.T) {
 		t.Error("Science Fiction post should not appear")
 	}
 }
+
 func setupPostTest(t *testing.T) (*sql.DB, *service.Service, *http.ServeMux) {
 	t.Helper()
 
