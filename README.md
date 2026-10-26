@@ -4,23 +4,25 @@ Literary Lions is a web forum where users can discuss books, share their thought
 
 The project is built using **Go**, **SQLite**, and server-rendered HTML templates.
 
-## Features
-Screenshots
+## Screenshots
+
+### Homepage
 
 <img src="screenshots/homepage.png" alt="Literary Lions Homepage" width="800">
 
-
+### Registration
 
 <img src="screenshots/register.png" alt="Literary Lions Register Page" width="800">
 
-
+### Login
 
 <img src="screenshots/login.png" alt="Literary Lions Login Page" width="800">
 
-
+### Post Details
 
 <img src="screenshots/post_details.png" alt="Literary Lions Post Details" width="800">
 
+## Features
 
 - User registration and login
 - Create, view, and delete posts
@@ -38,7 +40,7 @@ Screenshots
 - **SQLite** — Database
 - **HTML/CSS** — Frontend and page styling
 - **Go templates** — Server-side HTML rendering
-- **Docker** — Container setup (in progress)
+- **Docker** — Containerized application deployment
 
 ## Project Structure
 
@@ -54,114 +56,204 @@ forum/
 │   ├── model/          # Data models
 │   ├── repository/     # Database queries
 │   └── service/        # Business logic
+├── static/             # CSS and other static assets
 ├── templates/          # HTML templates
+├── screenshots/        # Application screenshots
+├── Dockerfile
 ├── Makefile
 └── README.md
 ```
 
-Getting Started
+## Getting Started
 
-Requirements
+### Requirements
 
-Go
+For running the application locally:
 
-Git
+- Go
+- Git
+- Make (optional)
 
-Installation
+For running the application with Docker:
+
+- Docker
+- Make (optional)
+
+### Installation
 
 Clone the repository and enter the project directory:
 
+```bash
 git clone <repository-url>
 cd forum
+```
 
 Download the Go dependencies:
 
+```bash
 go mod download
+```
 
-Running the Application
+### Running the Application
 
 Start the server using Make:
 
+```bash
 make run
+```
 
 Alternatively, run it directly with Go:
 
+```bash
 go run ./cmd/forum
+```
 
 Once the server starts, open:
 
 http://localhost:8080
 
-Makefile Commands
+## Running with Docker
 
-The project includes a Makefile to simplify development, testing, and building.
+Literary Lions can also be built and run using Docker.
 
-Command
+### Build the Docker Image
 
-Description
+From the project root, run:
 
-make run
+```bash
+make docker-build
+```
 
-Start the application
+Alternatively, without Make:
 
-make test
+```bash
+docker build -t literary-lions:1.0.0 .
+```
 
-Run all Go tests
+This builds the Docker image using the project's Dockerfile.
 
-make vet
+### Run the Docker Container
 
-Check for common Go code issues
+To start the application in the terminal:
 
-make fmt
+```bash
+make docker-run
+```
 
-Format Go source files
+Alternatively, to run the container in the background:
 
-make check-format
+```bash
+make docker-start
+```
 
-Verify Go formatting without changing files
+Once the application starts, open:
 
-make build
+http://localhost:8080
 
-Compile the application into bin/forum
+### Stop the Container
 
-make check
+To stop the running container:
 
-Run formatting checks, vetting, tests, and build
+```bash
+make docker-stop
+```
 
-Testing
+You can also press `Ctrl+C` if you started the application using `make docker-run`.
+
+### View Container Logs
+
+To view the application's logs:
+
+```bash
+make docker-logs
+```
+
+### Check Container Status
+
+To list containers, including stopped ones:
+
+```bash
+make docker-status
+```
+
+### Clean Up Docker Resources
+
+Remove the container:
+
+```bash
+make docker-clean
+```
+
+Remove the Docker image:
+
+```bash
+make docker-image-clean
+```
+
+**Note:** The current Docker configuration does not explicitly set up persistent SQLite storage. Database data stored inside the container may be lost when the container is removed.
+
+## Makefile Commands
+
+The project includes a Makefile to simplify development, testing, building, and running the application with Docker.
+
+| Command | Description |
+|---|---|
+| `make run` | Start the application locally |
+| `make test` | Run all Go tests |
+| `make vet` | Check for common Go code issues |
+| `make fmt` | Format Go source files |
+| `make check-format` | Verify Go formatting without changing files |
+| `make build` | Compile the application into `bin/forum` |
+| `make check` | Run formatting checks, vetting, tests, and build |
+| `make docker-build` | Build the Docker image |
+| `make docker-run` | Run the Docker container in the terminal |
+| `make docker-start` | Start the Docker container in the background |
+| `make docker-stop` | Stop the running container |
+| `make docker-logs` | View container logs |
+| `make docker-status` | List Docker containers |
+| `make docker-clean` | Remove the Docker container |
+| `make docker-image-clean` | Remove the Docker image |
+
+## Testing
 
 Run the test suite:
 
+```bash
 make test
+```
 
 To run tests without using cached results:
 
+```bash
 go test -count=1 ./...
+```
 
-Running All Checks
+## Running All Checks
 
 Before committing or pushing changes, run:
 
+```bash
 make check
+```
 
-This verifies formatting, runs go vet, executes the tests, and builds the application.
+This verifies formatting, runs `go vet`, executes the tests, and builds the application.
 
-Building the Application
+## Building the Application
 
 Compile the server:
 
+```bash
 make build
+```
 
 The executable will be created at:
 
+```text
 bin/forum
-
-## Docker
-
-Docker support is being finalized. Setup instructions will be added once the configuration is complete.
+```
 
 ## About the Project
 
 Literary Lions was developed as a group project to practice building a web application using Go.
 
-The project focuses on HTTP routing, authentication, database operations, server-side rendering, and testing.
+The project focuses on HTTP routing, authentication, database operations, server-side rendering, testing, and containerization.
