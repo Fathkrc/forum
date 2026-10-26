@@ -84,7 +84,7 @@ For running the application with Docker:
 Clone the repository and enter the project directory:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Fathkrc/forum.git
 cd forum
 ```
 
