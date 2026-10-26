@@ -11,11 +11,18 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	if err := os.Chdir("../.."); err != nil {
+		panic(err)
+	}
+	os.Exit(m.Run())
+}
 func TestSearchPostsHandler(t *testing.T) {
 	// 1. Create a temporary SQLite database.
 	dbPath := filepath.Join(t.TempDir(), "test.db")
@@ -106,7 +113,7 @@ func TestSearchPostsHandler(t *testing.T) {
 			name:         "empty search query",
 			url:          "/posts/search?q=",
 			wantStatus:   http.StatusBadRequest,
-			wantContains: []string{"Search query is required"},
+			wantContains: []string{"A search query is required."},
 		},
 	}
 
@@ -151,6 +158,7 @@ func TestSearchPostsHandler(t *testing.T) {
 		})
 	}
 }
+
 func TestListPostsByCategoryHandler(t *testing.T) {
 	ctx := context.Background()
 
@@ -185,29 +193,21 @@ func TestListPostsByCategoryHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Create two categories
-	result, err = db.ExecContext(ctx,
-		`INSERT INTO categories (name) VALUES (?)`,
+	// Get the embedded categories
+	var fantasyID int64
+	err = db.QueryRowContext(ctx,
+		"SELECT id FROM categories WHERE name = ?",
 		"Fantasy",
-	)
+	).Scan(&fantasyID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fantasyID, err := result.LastInsertId()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	result, err = db.ExecContext(ctx,
-		`INSERT INTO categories (name) VALUES (?)`,
+	var scifiID int64
+	err = db.QueryRowContext(ctx,
+		"SELECT id FROM categories WHERE name = ?",
 		"Science Fiction",
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	scifiID, err := result.LastInsertId()
+	).Scan(&scifiID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -263,6 +263,7 @@ func TestListPostsByCategoryHandler(t *testing.T) {
 		t.Error("Science Fiction post should not appear")
 	}
 }
+
 func setupPostTest(t *testing.T) (*sql.DB, *service.Service, *http.ServeMux) {
 	t.Helper()
 
@@ -356,13 +357,13 @@ func TestListPostsByUserHandler(t *testing.T) {
 			name:         "invalid user ID",
 			url:          "/posts/user?user=abc",
 			wantStatus:   http.StatusBadRequest,
-			wantContains: "Invalid user ID",
+			wantContains: "The user ID is invalid.",
 		},
 		{
 			name:         "missing user ID",
 			url:          "/posts/user",
 			wantStatus:   http.StatusBadRequest,
-			wantContains: "Invalid user ID",
+			wantContains: "The user ID is invalid.",
 		},
 	}
 
@@ -696,7 +697,6 @@ func TestGetPostByIDHandler(t *testing.T) {
 //		})
 //	}
 func TestHomeHandler(t *testing.T) {
-	t.Chdir("../..") // this is for test to see out packages
 	db, svc, mux := setupPostTest(t)
 	ctx := context.Background()
 

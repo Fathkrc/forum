@@ -2,6 +2,7 @@ package handler
 
 import (
 	"cmd/forum/internal/model"
+	"cmd/forum/internal/service"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -32,7 +33,8 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		categories, err := h.svc.GetAllCategories(r.Context())
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			log.Printf("GetAllCategories error: %v", err)
+			renderInternalError(w)
 			return
 		}
 		user, _ := getUserFromContext(r)
@@ -47,7 +49,9 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+			renderError(w, http.StatusBadRequest,
+				"Invalid Request",
+				"The form could not be processed.")
 			return
 		}
 
@@ -57,8 +61,10 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		var categoryIDs []int
 		for _, categoryStr := range r.Form["categories"] {
 			id, err := strconv.Atoi(categoryStr)
-			if err != nil {
-				http.Error(w, "Invalid category", http.StatusBadRequest)
+			if err != nil || id <= 0 {
+				renderError(w, http.StatusBadRequest,
+					"Invalid Request",
+					"The selected category is invalid.")
 				return
 			}
 			categoryIDs = append(categoryIDs, id)
@@ -92,32 +98,37 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 	}
 }
 
 func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 	idParam := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		http.Error(w, "Invalid post id", http.StatusBadRequest)
+	if err != nil || id <= 0 {
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The post ID is invalid.")
 		return
 	}
 	post, err := h.svc.GetPostByID(r.Context(), id)
 	if errors.Is(err, sql.ErrNoRows) {
-		http.Error(w, "Post not found", http.StatusNotFound)
+		log.Printf("GetPostByID error: %v", err)
+		renderNotFound(w)
 		return
 	}
 	if err != nil {
 		log.Printf("GetPostByID error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		renderInternalError(w)
 		return
 	}
 	user, _ := getUserFromContext(r)
 	comments, err := h.svc.GetCommentsByPost(r.Context(), id)
 	if err != nil {
 		log.Printf("GetCommentsByPost error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		renderInternalError(w)
 		return
 	}
 	isOwner := user != nil && user.ID == post.UserID
@@ -129,14 +140,16 @@ func (h *Handler) GetPostById(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	posts, err := h.svc.GetAllPosts(r.Context())
 	if err != nil {
 		log.Printf("GetAllPosts error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		renderInternalError(w)
 		return
 	}
 	if len(posts) == 0 {
@@ -147,20 +160,24 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) ListPostsByUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
 	if err != nil || userID <= 0 {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The user ID is invalid.")
 		return
 	}
 
 	posts, err := h.svc.GetPostsByUser(r.Context(), userID)
 	if err != nil {
 		log.Printf("GetPostsByUser error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		renderInternalError(w)
 		return
 	}
 
@@ -177,19 +194,24 @@ func (h *Handler) ListPostsByUser(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) ListPostsByCategory(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	categoryID, err := strconv.Atoi(r.URL.Query().Get("category"))
 	if err != nil || categoryID <= 0 {
-		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The category ID is invalid.")
 		return
 	}
 
 	posts, err := h.svc.GetPostsByCategory(r.Context(), categoryID)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("GetPostsByCategory error: %v", err)
+		renderInternalError(w)
 		return
 	}
 
@@ -204,21 +226,25 @@ func (h *Handler) ListPostsByCategory(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) SearchPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	query := strings.TrimSpace(r.URL.Query().Get("q"))
 
 	if query == "" {
-		http.Error(w, "Search query is required", http.StatusBadRequest)
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"A search query is required.")
 		return
 	}
 
 	posts, err := h.svc.SearchPosts(r.Context(), query)
 	if err != nil {
 		log.Printf("SearchPosts error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		renderInternalError(w)
 		return
 	}
 
@@ -235,20 +261,24 @@ func (h *Handler) SearchPosts(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) ListLikedPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 
 	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
 	if err != nil || userID <= 0 {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The user ID is invalid.")
 		return
 	}
 
 	posts, err := h.svc.GetLikedPostsByUser(r.Context(), userID)
 	if err != nil {
 		log.Printf("GetLikedPosts error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		renderInternalError(w)
 		return
 	}
 
@@ -266,23 +296,27 @@ func (h *Handler) ListLikedPosts(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id <= 0 {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The post ID is invalid.")
 		return
 	}
 
 	post, err := h.svc.GetPostByID(r.Context(), id)
 	if errors.Is(err, sql.ErrNoRows) {
-		http.NotFound(w, r)
+		renderNotFound(w)
 		return
 	}
 	if err != nil {
 		log.Printf("GetPostByID error: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		renderInternalError(w)
 		return
 	}
 
@@ -292,23 +326,26 @@ func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeletePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed",
-			http.StatusMethodNotAllowed)
+		renderError(w, http.StatusMethodNotAllowed,
+			"Method Not Allowed",
+			"This request method is not supported.")
 		return
 	}
 	postid := r.FormValue("post_id")
 	id, err := strconv.ParseInt(postid, 10, 64)
 
-	if err != nil {
-		http.Error(w, "Invalid post ID",
-			http.StatusBadRequest)
+	if err != nil || id <= 0 {
+		renderError(w, http.StatusBadRequest,
+			"Invalid Request",
+			"The post ID is invalid.")
 		return
 	}
 
 	user, ok := getUserFromContext(r)
 	if !ok || user == nil {
-		http.Error(w, "Unauthorized",
-			http.StatusUnauthorized)
+		renderError(w, http.StatusUnauthorized,
+			"Login Required",
+			"Please log in to continue.")
 		return
 	}
 	log.Printf("DELETE DEBUG: postID=%d userID=%d", id, user.ID)
@@ -318,15 +355,14 @@ func (h *Handler) DeletePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			http.Error(w, "Post not found",
-				http.StatusNotFound)
-		case errors.Is(err, errors.New("Unauthorized")):
-			http.Error(w, "Unauthorized Action",
-				http.StatusForbidden)
+			renderNotFound(w)
+		case errors.Is(err, service.ErrUnauthorized):
+			renderError(w, http.StatusForbidden,
+				"Access Denied",
+				"You don't have permission to delete this post.")
 		default:
 			log.Printf("DeletePost error: %v", err)
-			http.Error(w, "Internal Server Error",
-				http.StatusInternalServerError)
+			renderInternalError(w)
 		}
 		return
 	}

@@ -20,3 +20,32 @@ build:
 	go build -o bin/forum ./cmd/forum
 
 check: check-format vet test build
+
+# Docker
+DOCKER_IMAGE := literary-lions
+DOCKER_TAG := 1.0.0
+DOCKER_CONTAINER := literary-lions
+
+docker-build:
+	docker build -t $(DOCKER_IMAGE):$(DOCKER_TAG) .
+
+docker-run:
+	docker run --rm -it -p 8080:8080 --name $(DOCKER_CONTAINER) $(DOCKER_IMAGE):$(DOCKER_TAG)
+
+docker-start:
+	docker run -d --name $(DOCKER_CONTAINER) -p 8080:8080 $(DOCKER_IMAGE):$(DOCKER_TAG)
+
+docker-stop:
+	docker stop $(DOCKER_CONTAINER)
+
+docker-logs:
+	docker logs -f $(DOCKER_CONTAINER)
+
+docker-status:
+	docker ps -a
+
+docker-clean:
+	docker rm -f $(DOCKER_CONTAINER) 2>/dev/null || true
+
+docker-image-clean:
+	docker image rm $(DOCKER_IMAGE):$(DOCKER_TAG)
