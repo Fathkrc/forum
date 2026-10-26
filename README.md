@@ -22,7 +22,6 @@ Screenshots
 <img src="screenshots/post_details.png" alt="Literary Lions Post Details" width="800">
 
 
-
 - User registration and login
 - Create, view, and delete posts
 - Comment on discussions
