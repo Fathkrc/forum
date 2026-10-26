@@ -1,8 +1,12 @@
 package database
 
 import (
+	"cmd/forum/internal/model"
+	"cmd/forum/internal/repository"
+	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -120,5 +124,39 @@ func NewDataBase(dbName string) (*sql.DB, error) {
 // InitializeQuery creates the database tables using the defined schema.
 func InitializeQuery(db *sql.DB) error {
 	_, err := db.Exec(schema)
+	categoryRepo := repository.NewCategoryRepo(db)
+	if err := SeedBookCategories(context.Background(), categoryRepo); err != nil {
+		log.Fatalf("Failed to seed book categories: %v", err)
+	}
 	return err
+}
+
+func SeedBookCategories(
+	ctx context.Context,
+	categoryRepo *repository.CategoryRepo,
+) error {
+	categories := []*model.Category{
+		{Name: "Fantasy"},
+		{Name: "Science Fiction"},
+		{Name: "Mystery"},
+		{Name: "Thriller"},
+		{Name: "Romance"},
+		{Name: "Horror"},
+		{Name: "Historical Fiction"},
+		{Name: "Literary Fiction"},
+		{Name: "Adventure"},
+		{Name: "Biography"},
+		{Name: "Autobiography"},
+		{Name: "History"},
+		{Name: "Philosophy"},
+		{Name: "Psychology"},
+		{Name: "Science"},
+		{Name: "Self-Help"},
+		{Name: "Poetry"},
+		{Name: "Drama"},
+		{Name: "Classics"},
+		{Name: "Comics & Graphic Novels"},
+	}
+
+	return categoryRepo.InsertMultiCategory(ctx, categories)
 }

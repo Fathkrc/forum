@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -49,23 +50,30 @@ func (r *CategoryRepo) InsertMultiCategory(ctx context.Context, categories []*mo
 		return err
 	}
 	defer tx.Rollback()
-	query := `
+	insertQuery := `
         INSERT INTO categories (name)
         VALUES (?)
+        ON CONFLICT(name) DO NOTHING
     `
-	for _, category := range categories {
-		result, err := tx.ExecContext(ctx, query,
-			strings.TrimSpace(category.Name),
-		)
-		if err != nil {
-			return err
-		}
-		id, err := result.LastInsertId()
 
+	selectQuery := `SELECT id FROM categories WHERE name = ?`
+
+	for _, category := range categories {
+		name := strings.TrimSpace(category.Name)
+		if name == "" {
+			return fmt.Errorf("category name cannot be empty")
+		}
+
+		_, err := tx.ExecContext(ctx, insertQuery, name)
 		if err != nil {
 			return err
 		}
-		category.ID = int(id)
+
+		err = tx.QueryRowContext(ctx, selectQuery, name).
+			Scan(&category.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()
