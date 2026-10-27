@@ -294,35 +294,35 @@ func (h *Handler) ListLikedPosts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		renderError(w, http.StatusMethodNotAllowed,
-			"Method Not Allowed",
-			"This request method is not supported.")
-		return
-	}
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil || id <= 0 {
-		renderError(w, http.StatusBadRequest,
-			"Invalid Request",
-			"The post ID is invalid.")
-		return
-	}
-
-	post, err := h.svc.GetPostByID(r.Context(), id)
-	if errors.Is(err, sql.ErrNoRows) {
-		renderNotFound(w)
-		return
-	}
-	if err != nil {
-		log.Printf("GetPostByID error: %v", err)
-		renderInternalError(w)
-		return
-	}
-
-	fmt.Fprintf(w, "ID: %d, Title: %s, Content: %s\n",
-		post.ID, post.Title, post.Content)
-}
+// func (h *Handler) TestGetPost(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method != http.MethodGet {
+// 		renderError(w, http.StatusMethodNotAllowed,
+// 			"Method Not Allowed",
+// 			"This request method is not supported.")
+// 		return
+// 	}
+// 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+// 	if err != nil || id <= 0 {
+// 		renderError(w, http.StatusBadRequest,
+// 			"Invalid Request",
+// 			"The post ID is invalid.")
+// 		return
+// 	}
+//
+// 	post, err := h.svc.GetPostByID(r.Context(), id)
+// 	if errors.Is(err, sql.ErrNoRows) {
+// 		renderNotFound(w)
+// 		return
+// 	}
+// 	if err != nil {
+// 		log.Printf("GetPostByID error: %v", err)
+// 		renderInternalError(w)
+// 		return
+// 	}
+//
+// 	fmt.Fprintf(w, "ID: %d, Title: %s, Content: %s\n",
+// 		post.ID, post.Title, post.Content)
+// }
 
 func (h *Handler) DeletePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

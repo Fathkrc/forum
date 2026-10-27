@@ -5,6 +5,9 @@ Literary Lions is a web forum where users can discuss books, share their thought
 The project is built using **Go**, **SQLite**, and server-rendered HTML templates.
 
 ## Screenshots
+## Database ERD
+
+![Literary Lions Database ERD](screenshots/database-erd.png)
 
 ### Homepage
 
