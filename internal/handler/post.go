@@ -49,6 +49,12 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		err := r.ParseForm()
 		if err != nil {
+			var maxErr *http.MaxBytesError
+
+			if errors.As(err, &maxErr) {
+				renderError(w, http.StatusRequestEntityTooLarge, "Request body too large", "request body is more than 1 mb")
+				return
+			}
 			renderError(w, http.StatusBadRequest,
 				"Invalid Request",
 				"The form could not be processed.")

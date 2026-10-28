@@ -65,3 +65,11 @@ func LoadUser(svc *service.Service, next http.Handler) http.Handler {
 
 	})
 }
+func LimitRequestBody(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Maximum request body size: 1 MB
+		r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+
+		next.ServeHTTP(w, r)
+	})
+}
