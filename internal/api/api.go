@@ -27,7 +27,7 @@ func Run(port string, db *sql.DB) error {
 	httpHandler = middleware.LoadUser(svc, httpHandler)
 	httpHandler = middleware.Logger(httpHandler)
 	httpHandler = middleware.Recover(httpHandler)
-
+	httpHandler = middleware.RateLimit(httpHandler)
 	server := &http.Server{
 		Addr:              ":" + port,
 		Handler:           httpHandler,
