@@ -1361,3 +1361,12 @@ a:hover {
     text-decoration: underline;
 }
 }
+.post-card {
+    min-width: 0;
+}
+
+.post-card h2,
+.post-card h3 {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
