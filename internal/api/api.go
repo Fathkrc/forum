@@ -20,11 +20,14 @@ func Run(port string, db *sql.DB) error {
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 	var httpHandler http.Handler = mux
+	httpHandler = middleware.LimitRequestBody(httpHandler) // max 1 megabyte limit
+	csrf := http.NewCrossOriginProtection()                // Cross-Site Request Forgery
+	httpHandler = csrf.Handler(httpHandler)
 
 	httpHandler = middleware.LoadUser(svc, httpHandler)
 	httpHandler = middleware.Logger(httpHandler)
 	httpHandler = middleware.Recover(httpHandler)
-
+	httpHandler = middleware.RateLimit(httpHandler)
 	server := &http.Server{
 		Addr:              ":" + port,
 		Handler:           httpHandler,
