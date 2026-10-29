@@ -19,7 +19,10 @@ build:
 	mkdir -p bin
 	go build -o bin/forum ./cmd/forum
 
-check: check-format vet test build
+.PHONY: seed
+
+seed:
+	go run ./cmd/seed
 
 # Docker
 DOCKER_IMAGE := literary-lions
