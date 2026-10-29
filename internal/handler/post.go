@@ -61,7 +61,14 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		title := r.FormValue("title")
+		title := strings.TrimSpace(r.FormValue("title"))
+		if len([]rune(title)) > 100 {
+			renderError(w,
+				http.StatusBadRequest,
+				"Title Too Long",
+				"Post titles cannot exceed 100 characters.")
+			return
+		}
 		content := r.FormValue("content")
 
 		var categoryIDs []int
@@ -75,7 +82,6 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 			}
 			categoryIDs = append(categoryIDs, id)
 		}
-
 		if strings.TrimSpace(title) == "" || strings.TrimSpace(content) == "" {
 			categories, _ := h.svc.GetAllCategories(r.Context())
 			renderTemplate(w, "create-post", createPostData{
