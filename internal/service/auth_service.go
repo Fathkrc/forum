@@ -5,6 +5,7 @@ import (
 	"cmd/forum/internal/repository"
 	"context"
 	"errors"
+	"fmt"
 	"net/mail"
 	"strings"
 	"time"
@@ -81,7 +82,7 @@ func validateRegistration(email, username, password, confirmPassword string) err
 	}
 
 	if len(username) < 4 || len(username) > 12 {
-		return errors.New("Invalid Username")
+		return ErrInvalidUsername
 	}
 
 	if strings.TrimSpace(password) == "" {
@@ -111,7 +112,11 @@ func newSessionToken() (string, error) {
 func (s *AuthService) Login(ctx context.Context, email, password string) (*model.Session, error) {
 	user, err := s.userRepo.GetUserByEmail(ctx, normalizeEmail(email))
 	if err != nil {
-		return nil, ErrInvalidCredentials
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+
+		return nil, fmt.Errorf("login: %w", err)
 	}
 
 	matches, err := VerifyPassword(password, user.PasswordHash)
