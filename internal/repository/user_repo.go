@@ -4,6 +4,8 @@ import (
 	"cmd/forum/internal/model"
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 )
 
 type UserRepo struct {
@@ -13,6 +15,10 @@ type UserRepo struct {
 func NewUserRepo(db *sql.DB) *UserRepo {
 	return &UserRepo{db: db}
 }
+
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
 
 func (r *UserRepo) InsertUser(ctx context.Context, user *model.User) error {
 	query := `
@@ -40,12 +46,16 @@ func (r *UserRepo) GetUserByEmail(ctx context.Context, email string) (*model.Use
 				WHERE email = ?
 			`
 	user := &model.User{}
-	if err := r.db.QueryRowContext(ctx,
+	err := r.db.QueryRowContext(ctx,
 		query,
 		email).Scan(&user.ID,
 		&user.Username,
 		&user.PasswordHash,
-		&user.CreatedAt); err != nil {
+		&user.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrUserNotFound
+	}
+	if err != nil {
 		return nil, err
 	}
 	user.Email = email
@@ -59,9 +69,15 @@ func (r *UserRepo) GetUserByID(ctx context.Context, id int64) (*model.User, erro
 				WHERE id = ?
 			`
 	user := &model.User{}
-	if err := r.db.QueryRowContext(ctx, query, id).Scan(&user.Email, &user.Username); err != nil {
-		return nil, err
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&user.Email, &user.Username)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrUserNotFound
 	}
+
+	if err != nil {
+		return nil, fmt.Errorf("get user by ID: %w", err)
+	}
+
 	user.ID = int(id)
 	return user, nil
 }
@@ -95,7 +111,7 @@ func (r *UserRepo) UsernameExists(ctx context.Context, username string) (bool, e
 		username,
 	).Scan(&exists)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
 	}
 
